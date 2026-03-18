@@ -172,11 +172,14 @@ export function classifySignal(item: {
   const hasWeakTravel = weakTravelWords.some((kw) => text.includes(kw));
   const hasDisruption = disruptionKeywords.some((kw) => text.includes(kw));
 
-  // STEP 3: Check competitor mentions — TITLE ONLY to avoid false positives
-  // An article must mention the company in its TITLE to be tagged as a competitor signal.
-  // Matching on description/body produces too many false positives (e.g. "search on Google").
+  // STEP 3: Check competitor mentions — TITLE ONLY + WORD BOUNDARY matching
+  // Uses regex word boundaries to prevent "revolut" matching "revolutionize",
+  // "booking" matching "rebooking", etc.
   const matchedCompetitors = competitors.filter((c) =>
-    c.keywords.some((kw) => titleLower.includes(kw.toLowerCase()))
+    c.keywords.some((kw) => {
+      const escaped = kw.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      return new RegExp(`\\b${escaped}\\b`, "i").test(item.title);
+    })
   );
 
   // STEP 4: Relevance decision
