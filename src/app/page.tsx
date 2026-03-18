@@ -65,6 +65,30 @@ export default function OverviewPage() {
         <p className="text-sm text-gray-500 mt-1">Live competitive intelligence for travel distribution</p>
       </div>
 
+      {/* Explainer */}
+      <div className="bg-gradient-to-r from-amadeus-deep to-amadeus-accent rounded-xl p-5 text-white">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+          <div>
+            <p className="font-semibold mb-1 text-white/90">What is this?</p>
+            <p className="text-white/70 text-xs leading-relaxed">
+              A live intelligence tool that scrapes 15+ travel, tech, and startup news sources from the internet, filters for AI and travel tech relevance, and funnels them into an actionable view.
+            </p>
+          </div>
+          <div>
+            <p className="font-semibold mb-1 text-white/90">What is a signal?</p>
+            <p className="text-white/70 text-xs leading-relaxed">
+              A signal is a news item from the internet that has been automatically classified by competitor, value chain layer, and impact level. Every signal passed a relevance filter — it must relate to travel AND technology/AI disruption.
+            </p>
+          </div>
+          <div>
+            <p className="font-semibold mb-1 text-white/90">How does it work?</p>
+            <p className="text-white/70 text-xs leading-relaxed">
+              Hit <strong>Refresh</strong> to scrape RSS feeds from Skift, PhocusWire, TechCrunch, Google News, and more. Articles are parsed, filtered, classified, and stored. The dashboard updates in real time.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <StatCard label="Total Signals" value={signals.length} icon={Radio} color="text-amadeus-accent" />
