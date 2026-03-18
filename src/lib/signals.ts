@@ -119,7 +119,7 @@ const valueChainKeywords: Record<string, string[]> = {
   Discovery: ["search", "discover", "find", "plan", "inspire", "recommend", "personali", "meta-search", "metasearch", "compare"],
   Aggregation: ["aggregate", "gds", "inventory", "ndc", "content", "normalize", "api connect", "distribution", "supplier"],
   Booking: ["book", "checkout", "reserve", "purchase", "transaction", "conversion", "cart", "confirmation"],
-  Settlement: ["settle", "bsp", "arc", "clearing", "reconcil", "merchant of record", "revenue"],
+  Settlement: ["settle", "bsp", "arc", "clearing", "reconcil", "merchant of record"],
   Servicing: ["cancel", "refund", "rebook", "disrupt", "customer service", "support", "rebooking", "duty of care"],
   Payments: ["payment", "pay", "wallet", "fintech", "bnpl", "credit card", "revolut", "stripe"],
 };

@@ -28,12 +28,22 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [refreshResult, setRefreshResult] = useState<FetchResult | null>(null);
 
-  // Load from localStorage on mount
+  // Load from localStorage on mount, auto-refresh if never refreshed
   useEffect(() => {
     const stored = getStoredSignals();
     setSignals(stored);
-    setLastRefreshState(getLastRefresh());
-  }, []);
+    const lr = getLastRefresh();
+    setLastRefreshState(lr);
+
+    // Auto-refresh on first visit (no cached data from live feeds)
+    if (!lr) {
+      // Small delay so the UI renders baseline data first
+      const timer = setTimeout(() => {
+        refresh();
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const refresh = useCallback(async () => {
     setIsRefreshing(true);
