@@ -1,11 +1,34 @@
 import type { Signal } from "./signals";
 import { baselineSignals } from "./signals";
 
+// Bump this version whenever signal classification logic changes.
+// This forces a cache clear so stale/incorrectly-tagged signals are wiped.
+const CACHE_VERSION = "v3-title-only";
+const CACHE_VERSION_KEY = "amadeus_cache_version";
+
 const STORAGE_KEYS = {
   signals: "amadeus_signals",
   lastRefresh: "amadeus_last_refresh",
   settings: "amadeus_settings",
 } as const;
+
+// Auto-clear stale cache when code version changes
+function checkCacheVersion(): void {
+  if (typeof window === "undefined") return;
+  const stored = localStorage.getItem(CACHE_VERSION_KEY);
+  if (stored !== CACHE_VERSION) {
+    // Classification logic changed — wipe stale signals (keep settings)
+    localStorage.removeItem(STORAGE_KEYS.signals);
+    localStorage.removeItem(STORAGE_KEYS.lastRefresh);
+    localStorage.setItem(CACHE_VERSION_KEY, CACHE_VERSION);
+    console.log(`[Amadeus] Cache cleared: ${stored} → ${CACHE_VERSION}`);
+  }
+}
+
+// Run on module load
+if (typeof window !== "undefined") {
+  checkCacheVersion();
+}
 
 export interface FeedConfig {
   name: string;
