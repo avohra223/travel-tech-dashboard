@@ -1,0 +1,83 @@
+{
+  "lastUpdated": "2026-03-18",
+  "entries": [
+    {
+      "id": "mindtrip",
+      "name": "MindTrip",
+      "description": "AI-powered trip planning platform using generative AI for personalized multi-day itineraries with booking integration.",
+      "fundingAmount": 17000000,
+      "fundingRound": "Series A",
+      "investors": ["Greylock Partners", "Thayer Ventures"],
+      "foundedYear": 2022,
+      "headquarters": "San Francisco, CA",
+      "website": "https://www.mindtrip.ai",
+      "tags": ["Trip Planning", "GenAI", "Consumer"],
+      "announcedDate": "2025-06-15"
+    },
+    {
+      "id": "navan",
+      "name": "Navan",
+      "description": "Corporate travel and expense management platform with AI-driven booking, policy enforcement, and real-time spend analytics.",
+      "fundingAmount": 150000000,
+      "fundingRound": "Series G",
+      "investors": ["Base10 Partners", "Andreessen Horowitz", "Lightspeed Venture Partners"],
+      "foundedYear": 2015,
+      "headquarters": "Palo Alto, CA",
+      "website": "https://www.navan.com",
+      "tags": ["Corporate Travel", "Expense", "TMC", "Enterprise"],
+      "announcedDate": "2025-03-01"
+    },
+    {
+      "id": "layla-ai",
+      "name": "Layla AI",
+      "description": "Conversational AI travel agent offering personalized trip booking through natural language chat interface.",
+      "fundingAmount": 8500000,
+      "fundingRound": "Seed",
+      "investors": ["Sequoia Scout", "Y Combinator"],
+      "foundedYear": 2023,
+      "headquarters": "New York, NY",
+      "website": "https://www.justlayla.com",
+      "tags": ["Chatbot", "Booking", "Consumer", "AI Agent"],
+      "announcedDate": "2025-09-20"
+    },
+    {
+      "id": "voyageai",
+      "name": "VoyageAI",
+      "description": "B2B AI platform providing travel companies with recommendation engines and personalization APIs.",
+      "fundingAmount": 22000000,
+      "fundingRound": "Series A",
+      "investors": ["Accel", "Craft Ventures"],
+      "foundedYear": 2023,
+      "headquarters": "London, UK",
+      "website": "https://www.voyageai.com",
+      "tags": ["B2B", "Personalization", "API", "Recommendations"],
+      "announcedDate": "2025-11-10"
+    },
+    {
+      "id": "tripnotes",
+      "name": "TripNotes",
+      "description": "AI travel research tool that generates detailed destination guides from multiple sources with local insights.",
+      "fundingAmount": 4200000,
+      "fundingRound": "Pre-Seed",
+      "investors": ["Hustle Fund", "Angel Syndicate"],
+      "foundedYear": 2024,
+      "headquarters": "Austin, TX",
+      "website": "https://www.tripnotes.ai",
+      "tags": ["Research", "Content", "Consumer", "GenAI"],
+      "announcedDate": "2025-08-05"
+    },
+    {
+      "id": "flyr",
+      "name": "FLYR",
+      "description": "AI-driven revenue management and commercial platform for airlines, replacing legacy systems with deep learning models.",
+      "fundingAmount": 300000000,
+      "fundingRound": "Series D",
+      "investors": ["WestCap Group", "Softbank Vision Fund"],
+      "foundedYear": 2013,
+      "headquarters": "San Francisco, CA",
+      "website": "https://www.flyr.com",
+      "tags": ["Revenue Management", "Airlines", "Enterprise", "Deep Learning"],
+      "announcedDate": "2025-01-22"
+    }
+  ]
+}

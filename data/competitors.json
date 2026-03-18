@@ -1,0 +1,100 @@
+{
+  "lastUpdated": "2026-03-18",
+  "entries": [
+    {
+      "id": "sabre",
+      "name": "Sabre Corporation",
+      "category": "GDS",
+      "description": "Global distribution system and travel technology provider investing heavily in AI-powered retailing and pricing.",
+      "aiFeatures": [
+        "Sabre Travel AI for intelligent retailing",
+        "AI-powered pricing optimization",
+        "Predictive analytics for demand forecasting",
+        "Automated fare filing and auditing"
+      ],
+      "threatLevel": "high",
+      "website": "https://www.sabre.com",
+      "tags": ["GDS", "Pricing", "Retailing", "NDC"],
+      "notes": "Investing heavily in AI retailing capabilities since 2024. Partnered with Google Cloud for AI infrastructure."
+    },
+    {
+      "id": "travelport",
+      "name": "Travelport",
+      "category": "GDS",
+      "description": "Travel commerce platform connecting buyers and sellers of travel with modernized AI-driven content aggregation.",
+      "aiFeatures": [
+        "Travelport+ with AI-driven content aggregation",
+        "Smart search and booking recommendations",
+        "AI-powered trip management tools"
+      ],
+      "threatLevel": "medium",
+      "website": "https://www.travelport.com",
+      "tags": ["GDS", "Content", "NDC", "Aggregation"],
+      "notes": "Modernized platform with focus on NDC and AI content. Strong push into agency tools."
+    },
+    {
+      "id": "booking-holdings",
+      "name": "Booking Holdings",
+      "category": "OTA",
+      "description": "Parent company of Booking.com, Priceline, Kayak — largest OTA group with aggressive AI investment.",
+      "aiFeatures": [
+        "AI trip planner chatbot on Booking.com",
+        "AI-powered property recommendations",
+        "Dynamic pricing algorithms",
+        "Generative AI for review summaries"
+      ],
+      "threatLevel": "high",
+      "website": "https://www.bookingholdings.com",
+      "tags": ["OTA", "Chatbot", "Personalization", "Consumer"],
+      "notes": "Largest online travel company by revenue. AI chatbot live globally. Potential to disintermediate GDS."
+    },
+    {
+      "id": "expedia-group",
+      "name": "Expedia Group",
+      "category": "OTA",
+      "description": "Major OTA operating Expedia, Hotels.com, Vrbo with significant AI and conversational commerce push.",
+      "aiFeatures": [
+        "AI-powered travel planning assistant",
+        "ChatGPT plugin for Expedia",
+        "AI-driven loyalty and personalization engine",
+        "Smart property matching algorithms"
+      ],
+      "threatLevel": "high",
+      "website": "https://www.expediagroup.com",
+      "tags": ["OTA", "Chatbot", "Loyalty", "Consumer"],
+      "notes": "Early adopter of ChatGPT plugin. Building full conversational commerce experience."
+    },
+    {
+      "id": "trip-com",
+      "name": "Trip.com Group",
+      "category": "OTA",
+      "description": "Asia-Pacific focused OTA with advanced AI capabilities across the travel booking journey.",
+      "aiFeatures": [
+        "TripGenie AI travel assistant",
+        "AI-powered customer service automation",
+        "Real-time pricing intelligence",
+        "Multilingual AI translation for global travelers"
+      ],
+      "threatLevel": "medium",
+      "website": "https://www.trip.com",
+      "tags": ["OTA", "APAC", "AI Assistant", "Customer Service"],
+      "notes": "Dominant in China and expanding globally. TripGenie shows advanced conversational AI capabilities."
+    },
+    {
+      "id": "airbnb",
+      "name": "Airbnb",
+      "category": "Accommodation Platform",
+      "description": "Alternative accommodation platform expanding into full trip experiences with AI-driven personalization.",
+      "aiFeatures": [
+        "AI-powered listing optimization for hosts",
+        "Smart pricing suggestions",
+        "AI photo quality assessment",
+        "Personalized search ranking"
+      ],
+      "threatLevel": "medium",
+      "website": "https://www.airbnb.com",
+      "tags": ["Accommodation", "Personalization", "Marketplace"],
+      "notes": "Focus on AI for host tools and guest experience. Expanding into experiences beyond stays."
+    }
+  ]
+}

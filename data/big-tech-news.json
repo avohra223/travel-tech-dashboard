@@ -1,0 +1,82 @@
+{
+  "lastUpdated": "2026-03-18",
+  "entries": [
+    {
+      "id": "google-ai-travel-search-2026",
+      "company": "Google",
+      "headline": "Google Expands AI Overviews to Cover Full Trip Planning",
+      "summary": "Google now provides AI-generated full trip itineraries directly in search results, including flights, hotels, and activities with booking links — reducing the need for users to visit OTAs or GDS-powered sites.",
+      "date": "2026-02-10",
+      "category": "Product Launch",
+      "sourceUrl": "https://blog.google/products/travel",
+      "impactOnAmadeus": "high",
+      "tags": ["Search", "Trip Planning", "Disintermediation"]
+    },
+    {
+      "id": "amazon-alexa-travel-booking",
+      "company": "Amazon",
+      "headline": "Amazon Alexa+ Launches Voice-First Travel Booking",
+      "summary": "Amazon integrates flight and hotel booking capabilities into Alexa+, allowing users to search, compare, and book travel entirely through voice commands connected to Amazon Pay.",
+      "date": "2026-01-15",
+      "category": "Product Launch",
+      "sourceUrl": "https://www.aboutamazon.com",
+      "impactOnAmadeus": "medium",
+      "tags": ["Voice", "Booking", "Consumer", "Alexa"]
+    },
+    {
+      "id": "microsoft-copilot-travel",
+      "company": "Microsoft",
+      "headline": "Microsoft Copilot Adds Corporate Travel Booking to Teams",
+      "summary": "Microsoft integrates flight and hotel booking directly into Copilot within Teams and Outlook, targeting corporate travel managers with policy-aware AI recommendations.",
+      "date": "2025-11-05",
+      "category": "Product Launch",
+      "sourceUrl": "https://blogs.microsoft.com",
+      "impactOnAmadeus": "medium",
+      "tags": ["Copilot", "Corporate", "Enterprise", "Booking"]
+    },
+    {
+      "id": "apple-intelligence-maps",
+      "company": "Apple",
+      "headline": "Apple Intelligence Features Coming to Maps for Travel",
+      "summary": "Apple previews AI-powered travel guides, hotel recommendations, and trip planning features within Apple Maps, leveraging on-device AI for privacy-focused travel assistance.",
+      "date": "2026-01-20",
+      "category": "Announcement",
+      "sourceUrl": "https://www.apple.com/newsroom",
+      "impactOnAmadeus": "low",
+      "tags": ["Maps", "Consumer", "Apple Intelligence", "Privacy"]
+    },
+    {
+      "id": "meta-ai-travel-reels",
+      "company": "Meta",
+      "headline": "Meta Launches AI Travel Discovery Through Instagram Reels",
+      "summary": "Meta introduces AI-powered travel discovery features in Instagram, allowing users to get AI-curated destination recommendations and booking links directly from travel Reels content.",
+      "date": "2025-12-08",
+      "category": "Feature Update",
+      "sourceUrl": "https://about.meta.com",
+      "impactOnAmadeus": "low",
+      "tags": ["Social", "Discovery", "Consumer", "Instagram"]
+    },
+    {
+      "id": "google-flights-ai-predictions",
+      "company": "Google",
+      "headline": "Google Flights Adds AI Price Predictions and Delay Forecasts",
+      "summary": "Google Flights now uses Gemini-powered models to predict fare changes up to 60 days out and forecast delays with 85% accuracy, giving travelers unprecedented planning intelligence.",
+      "date": "2026-03-01",
+      "category": "Feature Update",
+      "sourceUrl": "https://blog.google/products/travel",
+      "impactOnAmadeus": "high",
+      "tags": ["Pricing", "Prediction", "Flights", "Google"]
+    },
+    {
+      "id": "amazon-business-travel",
+      "company": "Amazon",
+      "headline": "Amazon Business Expands into Corporate Travel Management",
+      "summary": "Amazon Business launches a travel procurement module allowing enterprises to manage travel spending alongside other business purchases, leveraging AI for policy compliance and cost optimization.",
+      "date": "2025-10-20",
+      "category": "Market Entry",
+      "sourceUrl": "https://www.aboutamazon.com",
+      "impactOnAmadeus": "medium",
+      "tags": ["Corporate", "Procurement", "Enterprise", "B2B"]
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "lastUpdated": "2026-03-18",
+  "entries": [
+    {
+      "id": "chatgpt-travel",
+      "name": "ChatGPT for Trip Planning",
+      "provider": "OpenAI",
+      "category": "Conversational AI",
+      "description": "General-purpose LLM used by millions for travel research, itinerary building, and booking advice.",
+      "travelUseCase": "Itinerary generation, destination research, price comparison advice",
+      "disruptionLevel": "high",
+      "launchDate": "2022-11",
+      "website": "https://chat.openai.com",
+      "tags": ["LLM", "Itinerary", "Consumer", "GenAI"]
+    },
+    {
+      "id": "google-gemini-travel",
+      "name": "Google Gemini Travel Features",
+      "provider": "Google",
+      "category": "Search + AI",
+      "description": "Gemini integration in Google Search and Maps providing AI-generated travel overviews and direct booking links.",
+      "travelUseCase": "AI search overviews for flights/hotels, Google Maps AI recommendations, trip planning in Gemini",
+      "disruptionLevel": "high",
+      "launchDate": "2024-05",
+      "website": "https://gemini.google.com",
+      "tags": ["Search", "Maps", "Consumer", "Google"]
+    },
+    {
+      "id": "perplexity-travel",
+      "name": "Perplexity AI Travel Search",
+      "provider": "Perplexity",
+      "category": "AI Search",
+      "description": "AI-powered search engine that provides cited travel recommendations and real-time pricing information.",
+      "travelUseCase": "Travel research with source citations, real-time flight and hotel pricing queries",
+      "disruptionLevel": "medium",
+      "launchDate": "2024-01",
+      "website": "https://www.perplexity.ai",
+      "tags": ["Search", "Research", "Consumer", "Citations"]
+    },
+    {
+      "id": "ai-booking-agents",
+      "name": "Autonomous AI Booking Agents",
+      "provider": "Various Startups",
+      "category": "Agentic AI",
+      "description": "AI agents that can autonomously search, compare, and book travel end-to-end without human intervention.",
+      "travelUseCase": "End-to-end autonomous booking, multi-step travel planning, price monitoring and auto-rebooking",
+      "disruptionLevel": "high",
+      "launchDate": "2025-01",
+      "website": "",
+      "tags": ["Agents", "Booking", "Automation", "Agentic"]
+    },
+    {
+      "id": "copilot-travel",
+      "name": "Microsoft Copilot Travel",
+      "provider": "Microsoft",
+      "category": "Enterprise AI",
+      "description": "Copilot integration for corporate travel management within Microsoft 365 ecosystem.",
+      "travelUseCase": "Corporate trip planning via Teams/Outlook, expense auto-categorization, policy compliance checking",
+      "disruptionLevel": "medium",
+      "launchDate": "2025-06",
+      "website": "https://copilot.microsoft.com",
+      "tags": ["Enterprise", "Corporate", "Microsoft", "Copilot"]
+    },
+    {
+      "id": "kayak-ask",
+      "name": "KAYAK Ask",
+      "provider": "Booking Holdings",
+      "category": "Conversational AI",
+      "description": "AI-powered conversational search experience built directly into KAYAK for natural language travel queries.",
+      "travelUseCase": "Natural language flight/hotel search, flexible date suggestions, price alerts via chat",
+      "disruptionLevel": "medium",
+      "launchDate": "2024-03",
+      "website": "https://www.kayak.com",
+      "tags": ["Search", "Chatbot", "OTA", "Consumer"]
+    },
+    {
+      "id": "hopper-ai",
+      "name": "Hopper Price Prediction AI",
+      "provider": "Hopper",
+      "category": "Predictive AI",
+      "description": "AI that predicts future flight and hotel prices with high accuracy, advising users when to buy or wait.",
+      "travelUseCase": "Price prediction, buy/wait recommendations, price freeze features, fare monitoring",
+      "disruptionLevel": "medium",
+      "launchDate": "2015-01",
+      "website": "https://www.hopper.com",
+      "tags": ["Pricing", "Prediction", "Consumer", "Mobile"]
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "lastUpdated": "2026-03-18",
+  "entries": [
+    {
+      "id": "ai-travel-agents",
+      "title": "Rise of AI Travel Agents",
+      "description": "Autonomous AI agents capable of searching, comparing, and booking travel are emerging as a major threat to traditional GDS intermediaries. These agents can handle multi-step bookings, negotiate on behalf of travelers, and integrate with payment systems.",
+      "impactRating": 5,
+      "timeline": "12-24 months",
+      "category": "Technology",
+      "sources": ["McKinsey Travel Report 2025", "Skift Research"],
+      "tags": ["Agents", "Disintermediation", "Booking", "Automation"]
+    },
+    {
+      "id": "personalization-at-scale",
+      "title": "Hyper-Personalization at Scale",
+      "description": "AI enabling real-time personalization of travel offers, pricing, and content based on individual traveler profiles, behavior patterns, and contextual signals. Moving from segment-based to individual-level offers.",
+      "impactRating": 4,
+      "timeline": "6-12 months",
+      "category": "Commercial",
+      "sources": ["Amadeus Internal Research", "PhocusWire"],
+      "tags": ["Personalization", "Retailing", "NDC", "Revenue"]
+    },
+    {
+      "id": "voice-multimodal-search",
+      "title": "Voice and Multimodal Travel Search",
+      "description": "Travelers increasingly using voice assistants, image-based search, and multimodal AI to discover and plan travel. Visual search for destinations and voice-first booking are gaining traction.",
+      "impactRating": 3,
+      "timeline": "24-36 months",
+      "category": "Consumer Behavior",
+      "sources": ["Google Travel Trends 2026", "Phocuswright"],
+      "tags": ["Voice", "Search", "Consumer", "Multimodal"]
+    },
+    {
+      "id": "gds-disintermediation",
+      "title": "Direct Channel AI Disintermediation",
+      "description": "Airlines and hotels building AI-powered direct booking channels that bypass GDS entirely. NDC and direct connect APIs combined with AI chatbots reduce dependency on traditional distribution.",
+      "impactRating": 5,
+      "timeline": "6-18 months",
+      "category": "Distribution",
+      "sources": ["IATA NDC Report", "Skift"],
+      "tags": ["NDC", "Direct", "Airlines", "Disintermediation"]
+    },
+    {
+      "id": "genai-content-creation",
+      "title": "GenAI for Travel Content Creation",
+      "description": "Generative AI transforming how travel content is created — from destination descriptions and hotel listings to personalized marketing copy and dynamic email campaigns.",
+      "impactRating": 3,
+      "timeline": "Already happening",
+      "category": "Marketing",
+      "sources": ["Expedia Media Solutions", "Sojern Research"],
+      "tags": ["GenAI", "Content", "Marketing", "Automation"]
+    },
+    {
+      "id": "ai-revenue-management",
+      "title": "AI-Driven Revenue Management",
+      "description": "Advanced AI models replacing traditional revenue management systems with real-time, dynamic pricing that responds to demand signals, competitive pricing, and individual willingness-to-pay.",
+      "impactRating": 4,
+      "timeline": "12-18 months",
+      "category": "Commercial",
+      "sources": ["PROS Holdings Research", "Airlines Reporting Corporation"],
+      "tags": ["Revenue", "Pricing", "Airlines", "Hotels"]
+    },
+    {
+      "id": "sustainable-travel-ai",
+      "title": "AI for Sustainable Travel Decisions",
+      "description": "AI tools helping travelers and corporations make more sustainable travel choices by calculating carbon footprints, suggesting greener alternatives, and optimizing travel policies for sustainability.",
+      "impactRating": 2,
+      "timeline": "12-24 months",
+      "category": "Sustainability",
+      "sources": ["WTTC Sustainability Report", "Amadeus ESG Research"],
+      "tags": ["Sustainability", "Carbon", "Corporate", "ESG"]
+    }
+  ]
+}
