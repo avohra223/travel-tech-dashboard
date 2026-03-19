@@ -104,7 +104,8 @@ export default function StartupRepositoryPage() {
         <div className="space-y-2">
           {/* Header row */}
           <div className="hidden md:grid md:grid-cols-12 gap-3 px-5 py-2 text-[10px] font-bold text-gray-400 uppercase">
-            <div className="col-span-3">Company</div>
+            <div className="col-span-2">Company</div>
+            <div className="col-span-1">HQ</div>
             <div className="col-span-2">Sub-Category</div>
             <div className="col-span-2">Funding</div>
             <div className="col-span-3">Value Chain</div>
@@ -125,11 +126,16 @@ export default function StartupRepositoryPage() {
                   className="w-full px-5 py-3.5 flex items-center justify-between hover:bg-gray-50/50 transition-colors text-left md:grid md:grid-cols-12 md:gap-3 md:items-center"
                 >
                   {/* Company name */}
-                  <div className="col-span-3 flex items-center gap-2 min-w-0">
+                  <div className="col-span-2 flex items-center gap-2 min-w-0">
                     <div className="w-8 h-8 rounded-lg bg-amadeus-accent/10 flex items-center justify-center text-amadeus-accent text-xs font-bold flex-shrink-0">
                       {startup.name.charAt(0)}
                     </div>
                     <p className="font-semibold text-amadeus-deep text-sm truncate">{startup.name}</p>
+                  </div>
+
+                  {/* HQ */}
+                  <div className="col-span-1 hidden md:block">
+                    <span className="text-xs text-gray-500">{startup.hq || "—"}</span>
                   </div>
 
                   {/* Sub-category */}
