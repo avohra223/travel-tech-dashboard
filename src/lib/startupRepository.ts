@@ -219,6 +219,11 @@ function cleanStartupName(name: string): string {
     "latin america", "asia", "europe", "africa", "middle east", "crypto",
     "travel", "hotel", "airline", "payment", "startup", "vc", "ai", "tech",
     "the", "new", "global", "world", "international", "digital", "smart",
+    "stage", "video", "interview", "analysis", "opinion", "report",
+    "exclusive", "breaking", "update", "review", "podcast", "webinar",
+    "startup stage", "hot 25", "ones to watch", "watch", "listen",
+    "feature", "sponsored", "special", "phocuswire", "skift",
+    "gen z", "gen-z",
     "cloud", "data", "online", "mobile", "next", "open", "fast", "easy",
     "one", "pro", "top", "best", "first", "big", "small", "free",
     "south", "north", "east", "west", "central",
@@ -327,16 +332,25 @@ export function buildStartupRepository(signals: Signal[]): StartupProfile[] {
   }
 
   // Also try to extract names from signals without startupName
-  const actionVerbs = "raises|raised|launches|launched|announces|announced|secures|secured|closes|closed|gets|receives|received|lands|landed|expands|expanded|partners|partnered|unveils|unveiled|debuts|debuted|acquires|acquired|snags|valued|nabs|bags|wins|won|rolls out|introduces|pivots|enters|opens|hits|reaches|reports";
+  const actionVerbs = "raises|raised|launches|launched|announces|announced|secures|secured|closes|closed|gets|receives|received|lands|landed|expands|expanded|partners|partnered|unveils|unveiled|debuts|debuted|acquires|acquired|snags|valued|nabs|bags|wins|won|rolls out|introduces|pivots|enters|opens|hits|reaches|reports|helps|lets|seeks|wants|aims|offers|brings|connects|enables|simplifies|streamlines|automates|transforms|disrupts|delivers|provides|builds|creates|makes|turns|uses|integrates|drives";
+
+  // Article prefixes to strip before name extraction
+  const articlePrefixes = /^(STARTUP STAGE|VIDEO|INTERVIEW|ANALYSIS|OPINION|REPORT|EXCLUSIVE|BREAKING|UPDATE|REVIEW|PODCAST|WEBINAR|SPONSORED|SPECIAL|FEATURE|HOT 25|ONES TO WATCH|WATCH|LISTEN)\s*:\s*/i;
+
   for (const s of startupSignals) {
     if (!s.startupName) {
+      // Strip article prefixes first
+      let title = s.title.replace(articlePrefixes, "").trim();
+      // Also strip source suffixes like " - PhocusWire"
+      title = title.replace(/\s*[-–—]\s*(PhocusWire|Skift|TechCrunch|The Verge|Ars Technica|Phocuswright|Travel And Tour World|Travel Weekly).*$/i, "").trim();
+
       const patterns = [
         new RegExp(`^([A-Z][a-zA-Z0-9\\s.&'-]+?)\\s+(?:${actionVerbs})`),
         new RegExp(`^([A-Z][a-zA-Z0-9.]+)\\s*[,:]`),
         new RegExp(`(?:startup|company|platform|app)\\s+([A-Z][a-zA-Z0-9.]+)`, "i"),
       ];
       for (const pattern of patterns) {
-        const match = s.title.match(pattern);
+        const match = title.match(pattern);
         if (match) {
           const name = cleanStartupName(match[1].trim());
           if (name.length > 2 && name.length < 35) {
@@ -363,7 +377,8 @@ export function buildStartupRepository(signals: Signal[]): StartupProfile[] {
     sigs.forEach((s) => s.valueChainLayers.forEach((l) => allLayers.add(l)));
 
     const subCategory = detectSubCategory(`${name} ${allText}`);
-    const desc = sorted[0].description || sorted[0].title;
+    const rawDesc = sorted[0].description || sorted[0].title;
+    const desc = rawDesc.replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
     const threat =
       sorted.find((s) => s.amadeusThreat && !s.amadeusThreat.includes("Emerging travel tech"))
         ?.amadeusThreat || sorted[0].amadeusThreat;

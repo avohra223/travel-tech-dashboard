@@ -3,7 +3,7 @@ import { baselineSignals } from "./signals";
 
 // Bump this version whenever signal classification logic changes.
 // This forces a cache clear so stale/incorrectly-tagged signals are wiped.
-const CACHE_VERSION = "v5-balanced-keywords";
+const CACHE_VERSION = "v6-fix-startup-names";
 const CACHE_VERSION_KEY = "amadeus_cache_version";
 
 const STORAGE_KEYS = {
