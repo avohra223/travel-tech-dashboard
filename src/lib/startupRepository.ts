@@ -188,25 +188,48 @@ function extractHQ(name: string, text: string): string {
 
 // Clean startup name — remove prefixes and reject bad names
 function cleanStartupName(name: string): string {
-  let cleaned = name
+  let cleaned = name.trim();
+
+  // --- PATTERN: "descriptor startup/platform ActualName" → extract ActualName ---
+  // Handles: "SaaS startup TravelPerk", "Hotel procurement startup Reeco",
+  // "Barcelona unicorn TravelPerk", "Boutique hotel tech platform NUMA",
+  // "Online travel marketplace Evaneos", "AI travel startup Visio Trip",
+  // "Corporate guest travel startup Juno", "TravelTech platform GeniusTravel"
+  const extractLast = cleaned.match(
+    /(?:startup|platform|company|firm|unicorn|marketplace|venture|tool|app|service|solution|provider)\s+([A-Z][a-zA-Z0-9.\-&' ]{1,30})$/i
+  );
+  if (extractLast) {
+    cleaned = extractLast[1].trim();
+  }
+
+  // Strip "VC " prefix (e.g., "VC GHARAGE" → "GHARAGE")
+  cleaned = cleaned.replace(/^VC\s+/i, "");
+
+  // --- Standard prefix stripping ---
+  cleaned = cleaned
     // Remove "city/country-based" prefixes
     .replace(/^[A-Za-z\s]+-based\s+/i, "")
-    // Remove country/region adjective prefixes
-    .replace(/^(Dutch|Indian|Israeli|UK-based|US-based|Berlin-based|London-based|Paris-based|Singapore-based|European|Asia-based|China-based|Brazilian|Chinese|Japanese|Korean|Thai|Vietnamese|Indonesian|Malaysian|Filipino|Australian|Canadian|French|German|Spanish|Italian|Swiss|Swedish|Norwegian|Danish|Finnish|Irish|Scottish|Turkish|Egyptian|Saudi|Emirati|South African|Nigerian|Kenyan|Mexican|Colombian|Argentine|Chilean|Peruvian|Ukrainian|Latin American?|SA|UAE|Hong Kong|New Zealand|Southeast Asian|Czech|Estonian|Latvian|Lithuanian|Polish|Greek|Portuguese|Hungarian|Romanian|Bulgarian|Croatian|Serbian)\s+/i, "")
-    // Remove descriptor prefixes
-    .replace(/^(startup|travel tech|hotel tech|airline tech|fintech|traveltech firm|travel startup|hotel startup|airline startup|travel company|tech startup|AI startup|travel AI|Indian travel fintech firm|Traveltech firm|travel platform|company|platform|app|VC|venture|corporate travel|hospitality)\s+/i, "")
-    // Second pass for remaining generic prefixes
-    .replace(/^(travel|tech|startup|company|platform|firm|venture)\s+/i, "")
+    // Remove nationality/region adjective prefixes (comprehensive)
+    .replace(/^(Dutch|Indian|Israeli|UK|US|Brazilian|Chinese|Japanese|Korean|Thai|Vietnamese|Indonesian|Malaysian|Filipino|Australian|Canadian|French|German|Spanish|Italian|Swiss|Swedish|Norwegian|Danish|Finnish|Irish|Scottish|Turkish|Egyptian|Saudi|Emirati|South African|Nigerian|Kenyan|Mexican|Colombian|Argentine|Chilean|Peruvian|Ukrainian|Czech|Estonian|Latvian|Lithuanian|Polish|Greek|Portuguese|Hungarian|Romanian|Bulgarian|Croatian|Serbian|European|Southeast Asian|Latin American|Austrian|South Korean|New Zealand|Barcelona|London|Berlin|Paris|Amsterdam|Prague|Tel Aviv|Singapore|Hong Kong|Dubai|Boutique|Online|Corporate|Sustainable|Parametric|SaaS)\s+/i, "")
+    // Remove descriptor words (multi-pass)
+    .replace(/^(startup|travel\s*tech|hotel\s*tech|airline\s*tech|fintech|traveltech|travel|hotel|airline|tech|AI|robotics|hospitality|business|corporate|guest|procurement|sustainable|boutique|online|digital|smart|SaaS|B2B|B2C)\s+/gi, "")
+    .replace(/^(startup|platform|company|firm|unicorn|marketplace|venture|tool|app|service|solution|provider)\s+/gi, "")
+    // One more pass for stubborn prefixes
+    .replace(/^(startup|travel|tech|hotel|AI|platform|company|firm)\s+/gi, "")
     .replace(/\s*[-–|:].+$/, "") // Remove everything after dash/colon
     .replace(/\s*\(.+\)$/, "") // Remove parenthetical
+    .replace(/\s+co$/i, "") // Remove trailing "co" as in "Ele.me co"
+    .replace(/\s+Technology Solutions$/i, "") // "Hopper Technology Solutions" → "Hopper"
+    .replace(/\s+Ventures$/i, "") // "GHARAGE Ventures" → "GHARAGE"
     .trim();
 
   // Reject if it still looks like a sentence or generic term
   const words = cleaned.split(/\s+/);
-  if (words.length > 5) return "";
+  if (words.length > 4) return "";
+  if (cleaned.length < 2) return "";
   if (/^[a-z]/.test(cleaned)) return "";
 
-  const sentenceWords = ["is", "are", "was", "were", "has", "have", "had", "will", "would", "could", "should", "that", "this", "with", "from", "but", "not"];
+  const sentenceWords = ["is", "are", "was", "were", "has", "have", "had", "will", "would", "could", "should", "that", "this", "with", "from", "but", "not", "for", "and", "the", "its"];
   const sentenceWordCount = sentenceWords.filter((w) => new RegExp(`\\b${w}\\b`, "i").test(cleaned)).length;
   if (sentenceWordCount >= 2) return "";
 
@@ -216,6 +239,7 @@ function cleanStartupName(name: string): string {
   if (countries.includes(lowerCleaned)) return "";
 
   const rejectList = [
+    // Generic words that aren't startup names
     "latin america", "asia", "europe", "africa", "middle east", "crypto",
     "travel", "hotel", "airline", "payment", "startup", "vc", "ai", "tech",
     "the", "new", "global", "world", "international", "digital", "smart",
@@ -227,8 +251,35 @@ function cleanStartupName(name: string): string {
     "cloud", "data", "online", "mobile", "next", "open", "fast", "easy",
     "one", "pro", "top", "best", "first", "big", "small", "free",
     "south", "north", "east", "west", "central",
+    // Common English words that get false-matched as startup names
+    "raises", "story", "just", "fly", "daily", "upgrade", "peer",
+    "convoy", "nuit", "liven", "frontier", "summit", "beacon",
+    "edge", "focus", "insight", "bridge", "quest", "flow", "spark",
+    "point", "wave", "shift", "core", "base", "hub", "loop",
+    "link", "nest", "mark", "scope", "path", "rise", "meet",
+    // Known large companies (acquirers) — not startups
+    "just eat", "just eat takeaway", "capital one", "mastercard", "visa",
+    "american express", "jpmorgan", "goldman sachs", "morgan stanley",
+    "citigroup", "barclays", "hsbc", "deutsche bank", "ubs",
+    "singapore airlines", "lufthansa", "delta", "united", "emirates",
+    "marriott", "hilton", "ihg", "accor", "wyndham", "hyatt",
+    "uber", "lyft", "airbnb", "tripadvisor", "trip.com",
+    "alibaba", "tencent", "baidu", "jd.com", "meituan",
+    "robotics", "medical travel",
+    // More generic English words that slip through
+    "funding", "profile", "pitch", "escape", "aims", "embargo",
+    "engine", "spun", "can", "gru", "apply", "scout", "atlas",
+    "anchor", "launch", "track", "venture", "route", "trips",
+    "wings", "miles", "stay", "check", "pass", "gate", "port",
+    // Known large companies / GDS competitors — not startups
+    "sabre", "travelport", "amadeus", "booking.com", "expedia",
+    "tripadvisor", "trip.com", "agoda", "kayak", "priceline",
+    "skyscanner", "trivago", "momondo", "opodo", "edreams",
   ];
   if (rejectList.includes(lowerCleaned)) return "";
+
+  // Reject if starts with "The " (likely a phrase, not a name)
+  if (/^The\s/i.test(cleaned) && words.length > 2) return "";
 
   return cleaned;
 }
