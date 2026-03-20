@@ -271,10 +271,16 @@ function cleanStartupName(name: string): string {
     "engine", "spun", "can", "gru", "apply", "scout", "atlas",
     "anchor", "launch", "track", "venture", "route", "trips",
     "wings", "miles", "stay", "check", "pass", "gate", "port",
-    // Known large companies / GDS competitors — not startups
+    // Known large companies / GDS competitors / acquirers — not startups
     "sabre", "travelport", "amadeus", "booking.com", "expedia",
     "tripadvisor", "trip.com", "agoda", "kayak", "priceline",
     "skyscanner", "trivago", "momondo", "opodo", "edreams",
+    "etraveli", "etraveli group", "booking holdings", "expedia group",
+    "trip.com group", "travelsky", "webjet", "dnata", "farelogix",
+    "lufthansa", "delta", "united airlines", "emirates", "qatar airways",
+    "singapore airlines", "klarna", "revolut", "stripe", "paypal",
+    "square", "block", "salesforce", "oracle", "sap", "intuit",
+    "shopify", "delivery hero", "just eat takeaway",
   ];
   if (rejectList.includes(lowerCleaned)) return "";
 
@@ -383,10 +389,23 @@ export function buildStartupRepository(signals: Signal[]): StartupProfile[] {
   }
 
   // Also try to extract names from signals without startupName
-  const actionVerbs = "raises|raised|launches|launched|announces|announced|secures|secured|closes|closed|gets|receives|received|lands|landed|expands|expanded|partners|partnered|unveils|unveiled|debuts|debuted|acquires|acquired|snags|valued|nabs|bags|wins|won|rolls out|introduces|pivots|enters|opens|hits|reaches|reports|helps|lets|seeks|wants|aims|offers|brings|connects|enables|simplifies|streamlines|automates|transforms|disrupts|delivers|provides|builds|creates|makes|turns|uses|integrates|drives";
+  const actionVerbs = "raises|raised|launches|launched|announces|announced|secures|secured|closes|closed|gets|receives|received|lands|landed|expands|expanded|partners|partnered|unveils|unveiled|debuts|debuted|snags|valued|nabs|bags|wins|won|rolls out|introduces|pivots|enters|opens|hits|reaches|reports|helps|lets|seeks|wants|aims|offers|brings|connects|enables|simplifies|streamlines|automates|transforms|disrupts|delivers|provides|builds|creates|makes|turns|uses|integrates|drives";
 
   // Article prefixes to strip before name extraction
   const articlePrefixes = /^(STARTUP STAGE|VIDEO|INTERVIEW|ANALYSIS|OPINION|REPORT|EXCLUSIVE|BREAKING|UPDATE|REVIEW|PODCAST|WEBINAR|SPONSORED|SPECIAL|FEATURE|HOT 25|ONES TO WATCH|WATCH|LISTEN)\s*:\s*/i;
+
+  // Known acquirers — large companies that buy startups (extract the acquiree, not the acquirer)
+  const knownAcquirers = [
+    "etraveli", "booking holdings", "booking.com", "expedia", "expedia group",
+    "trip.com", "trip.com group", "airbnb", "tripadvisor", "google", "amazon",
+    "microsoft", "apple", "meta", "uber", "visa", "mastercard", "american express",
+    "capital one", "jpmorgan", "goldman sachs", "marriott", "hilton", "ihg", "accor",
+    "hyatt", "wyndham", "sabre", "amadeus", "travelport", "travelsky",
+    "lufthansa", "delta", "united airlines", "emirates", "singapore airlines",
+    "klarna", "revolut", "stripe", "paypal", "square", "block",
+    "salesforce", "oracle", "sap", "intuit", "shopify",
+    "just eat", "just eat takeaway", "delivery hero",
+  ];
 
   for (const s of startupSignals) {
     if (!s.startupName) {
@@ -394,6 +413,26 @@ export function buildStartupRepository(signals: Signal[]): StartupProfile[] {
       let title = s.title.replace(articlePrefixes, "").trim();
       // Also strip source suffixes like " - PhocusWire"
       title = title.replace(/\s*[-–—]\s*(PhocusWire|Skift|TechCrunch|The Verge|Ars Technica|Phocuswright|Travel And Tour World|Travel Weekly).*$/i, "").trim();
+
+      // --- ACQUISITION PATTERN: "X acquires/buys Y" → extract Y as startup ---
+      const acquisitionMatch = title.match(
+        /^(.+?)\s+(?:acquires?|acquired|buys?|bought|purchases?|purchased|snaps up|picks up|takes over|to acquire|to buy|to purchase)\s+(.+?)(?:\s+(?:for|in|to)\s+|$)/i
+      );
+      if (acquisitionMatch) {
+        const acquirer = acquisitionMatch[1].trim().toLowerCase();
+        const acquiree = acquisitionMatch[2].trim();
+        // Check if the acquirer is a known large company
+        const isKnownAcquirer = knownAcquirers.some((a) => acquirer.includes(a) || a.includes(acquirer));
+        if (isKnownAcquirer) {
+          // Extract the acquiree (the startup being acquired)
+          const name = cleanStartupName(acquiree);
+          if (name.length > 2 && name.length < 35) {
+            if (!byName.has(name)) byName.set(name, []);
+            byName.get(name)!.push(s);
+            continue; // Skip other patterns — we found the startup
+          }
+        }
+      }
 
       const patterns = [
         new RegExp(`^([A-Z][a-zA-Z0-9\\s.&'-]+?)\\s+(?:${actionVerbs})`),
