@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import * as XLSX from "xlsx";
 import { useDashboard } from "@/lib/DashboardContext";
 import { buildStartupRepository, type StartupProfile } from "@/lib/startupRepository";
 import StatCard from "@/components/ui/StatCard";
 import SearchBar from "@/components/ui/SearchBar";
-import { Database, Building2, DollarSign, Layers, ExternalLink, ChevronDown, ChevronUp, Globe } from "lucide-react";
+import { Database, Building2, DollarSign, Layers, ExternalLink, ChevronDown, ChevronUp, Globe, Download } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 const impactColors: Record<string, string> = {
@@ -52,13 +53,71 @@ export default function StartupRepositoryPage() {
 
   const totalFunded = startups.filter((s) => s.totalFunding !== "Undisclosed").length;
 
+  const handleExport = () => {
+    const startupRows = startups.map((s) => ({
+      Name: s.name,
+      HQ: s.hq || "",
+      "Sub-Category": s.subCategory,
+      "Total Funding": s.totalFunding,
+      "Latest Round": s.latestRound,
+      "Value Chain Targets": s.valueChainTargets.join("; "),
+      "Amadeus Threat": s.amadeusThreat,
+      "Signal Count": s.signalCount,
+      "First Seen": s.firstSeen,
+      "Last Seen": s.lastSeen,
+      Website: s.website || "",
+      Description: s.description,
+    }));
+
+    const signalRows = startups.flatMap((s) =>
+      s.signals.map((sig) => ({
+        Startup: s.name,
+        Date: sig.date,
+        Title: sig.title,
+        Source: sig.source,
+        Impact: sig.impact,
+        Link: sig.link || "",
+      }))
+    );
+
+    const setColWidths = (sheet: XLSX.WorkSheet, rows: Record<string, unknown>[]) => {
+      if (rows.length === 0) return;
+      const keys = Object.keys(rows[0]);
+      sheet["!cols"] = keys.map((k) => {
+        const maxLen = Math.max(k.length, ...rows.map((r) => String(r[k] ?? "").length));
+        return { wch: Math.min(maxLen + 2, 60) };
+      });
+    };
+
+    const wb = XLSX.utils.book_new();
+    const startupSheet = XLSX.utils.json_to_sheet(startupRows);
+    const signalSheet = XLSX.utils.json_to_sheet(signalRows);
+    setColWidths(startupSheet, startupRows);
+    setColWidths(signalSheet, signalRows);
+    XLSX.utils.book_append_sheet(wb, startupSheet, "Startups");
+    XLSX.utils.book_append_sheet(wb, signalSheet, "Signals");
+
+    const today = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(wb, `startup-repository-${today}.xlsx`);
+  };
+
   return (
     <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-xl font-bold text-amadeus-deep">Startup Repository</h1>
-        <p className="text-sm text-gray-500">
-          Unique travel tech companies extracted from all signal sources — a living database of potential disruptors
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-bold text-amadeus-deep">Startup Repository</h1>
+          <p className="text-sm text-gray-500">
+            Unique travel tech companies extracted from all signal sources — a living database of potential disruptors
+          </p>
+        </div>
+        <button
+          onClick={handleExport}
+          disabled={startups.length === 0}
+          className="flex items-center gap-2 px-4 py-2 bg-amadeus-accent text-white text-sm font-medium rounded-lg hover:bg-amadeus-accent/90 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors flex-shrink-0"
+        >
+          <Download size={16} />
+          Export to Excel
+        </button>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
