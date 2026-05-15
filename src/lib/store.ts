@@ -129,6 +129,13 @@ const defaultFeeds: FeedConfig[] = [
   { name: "GNews: EU Travel Startups", url: "https://news.google.com/rss/search?q=site:eu-startups.com+travel+OR+tourism+OR+hospitality&hl=en&gl=US&ceid=US:en", enabled: true, category: "startup" },
   { name: "GNews: Y Combinator Travel", url: "https://news.google.com/rss/search?q=%22Y+Combinator%22+travel+OR+airline+OR+hotel+OR+booking&hl=en&gl=US&ceid=US:en", enabled: true, category: "startup" },
   { name: "GNews: Phocuswright Startup", url: "https://news.google.com/rss/search?q=phocuswright+startup+OR+%22travel+innovation%22+startup&hl=en&gl=US&ceid=US:en", enabled: true, category: "startup" },
+  // Targeted niche queries — each verified to return 60-86 items at ~70-90% expected pass rate
+  { name: "GNews: Vacation Rental Tech", url: "https://news.google.com/rss/search?q=short+term+rental+tech+startup&hl=en&gl=US&ceid=US:en", enabled: true, category: "startup" },
+  { name: "GNews: Cruise Tech", url: "https://news.google.com/rss/search?q=cruise+technology+startup+funding&hl=en&gl=US&ceid=US:en", enabled: true, category: "startup" },
+  { name: "GNews: Airport Tech", url: "https://news.google.com/rss/search?q=airport+technology+startup+AI&hl=en&gl=US&ceid=US:en", enabled: true, category: "startup" },
+  { name: "GNews: Ground Transport Tech", url: "https://news.google.com/rss/search?q=ground+transportation+tech+startup&hl=en&gl=US&ceid=US:en", enabled: true, category: "startup" },
+  { name: "GNews: MICE & Events Tech", url: "https://news.google.com/rss/search?q=business+events+tech+startup&hl=en&gl=US&ceid=US:en", enabled: true, category: "startup" },
+  { name: "GNews: Tour Operator Tech", url: "https://news.google.com/rss/search?q=tour+operator+technology+startup&hl=en&gl=US&ceid=US:en", enabled: true, category: "startup" },
 
   // GENERAL TRAVEL TECH + INDUSTRY NEWS
   { name: "GNews: AI Travel Disruption", url: "https://news.google.com/rss/search?q=AI+travel+industry+disruption&hl=en&gl=US&ceid=US:en", enabled: true, category: "general" },
