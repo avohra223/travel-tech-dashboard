@@ -10,7 +10,17 @@ const STORAGE_KEYS = {
   signals: "amadeus_signals",
   lastRefresh: "amadeus_last_refresh",
   settings: "amadeus_settings",
+  feedStats: "amadeus_feed_stats",
 } as const;
+
+// Per-feed stats from the most recent refresh — used by Settings page to
+// surface fetched / relevant counts for diagnosis.
+export interface FeedStatsSnapshot {
+  refreshedAt: string;
+  totalFetched: number;
+  totalRelevant: number;
+  perFeed: { name: string; url: string; count: number; relevant: number; error?: string }[];
+}
 
 // Update version marker without wiping data — signals only grow, never shrink
 function checkCacheVersion(): void {
@@ -171,6 +181,23 @@ export function getSettings(): DashboardSettings {
 export function saveSettings(settings: DashboardSettings): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(settings));
+}
+
+// --- Feed Stats (per-refresh diagnostic) ---
+export function getFeedStats(): FeedStatsSnapshot | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.feedStats);
+    if (!raw) return null;
+    return JSON.parse(raw) as FeedStatsSnapshot;
+  } catch {
+    return null;
+  }
+}
+
+export function storeFeedStats(stats: FeedStatsSnapshot): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(STORAGE_KEYS.feedStats, JSON.stringify(stats));
 }
 
 export function clearAllData(): void {

@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import {
-  getSettings, saveSettings, clearAllData, exportAllData,
-  type DashboardSettings, type FeedConfig,
+  getSettings, saveSettings, clearAllData, exportAllData, getFeedStats,
+  type DashboardSettings, type FeedConfig, type FeedStatsSnapshot,
 } from "@/lib/store";
-import { Save, Trash2, Download, Plus, X, RotateCcw } from "lucide-react";
+import { Save, Trash2, Download, Plus, X, RotateCcw, BarChart3, AlertCircle } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 
 const feedCategories = ["travel", "tech", "startup", "general"] as const;
 const categoryColors: Record<string, string> = {
@@ -17,10 +18,18 @@ const categoryColors: Record<string, string> = {
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<DashboardSettings | null>(null);
+  const [feedStats, setFeedStats] = useState<FeedStatsSnapshot | null>(null);
   const [saved, setSaved] = useState(false);
 
-  useEffect(() => { setSettings(getSettings()); }, []);
+  useEffect(() => {
+    setSettings(getSettings());
+    setFeedStats(getFeedStats());
+  }, []);
   if (!settings) return null;
+
+  // Build a lookup from feed name → stats for quick rendering
+  const statsByName = new Map<string, FeedStatsSnapshot["perFeed"][number]>();
+  for (const s of feedStats?.perFeed ?? []) statsByName.set(s.name, s);
 
   const handleSave = () => {
     saveSettings(settings);
@@ -81,6 +90,49 @@ export default function SettingsPage() {
       <h1 className="text-xl font-bold text-amadeus-deep">Settings</h1>
       <p className="text-sm text-gray-500">Manage RSS feeds, keywords, and data. Changes apply on next Refresh.</p>
 
+      {/* Last refresh stats — per-feed diagnostic */}
+      {feedStats && (
+        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+          <div className="flex items-center gap-2 mb-3">
+            <BarChart3 size={16} className="text-amadeus-accent" />
+            <h2 className="font-semibold text-amadeus-deep">Last Refresh Stats</h2>
+            <span className="text-xs text-gray-400">
+              · {(() => {
+                try { return formatDistanceToNow(new Date(feedStats.refreshedAt), { addSuffix: true }); }
+                catch { return feedStats.refreshedAt; }
+              })()}
+            </span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+            <div>
+              <p className="text-[10px] font-bold text-gray-400 uppercase">Items Fetched</p>
+              <p className="text-lg font-semibold text-amadeus-deep">{feedStats.totalFetched}</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-gray-400 uppercase">Relevant After Filter</p>
+              <p className="text-lg font-semibold text-amadeus-accent">{feedStats.totalRelevant}</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-gray-400 uppercase">Pass Rate</p>
+              <p className="text-lg font-semibold text-amadeus-deep">
+                {feedStats.totalFetched > 0
+                  ? `${Math.round((feedStats.totalRelevant / feedStats.totalFetched) * 100)}%`
+                  : "—"}
+              </p>
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-gray-400 uppercase">Feeds With Errors</p>
+              <p className="text-lg font-semibold text-red-500">
+                {feedStats.perFeed.filter((f) => f.error).length}
+              </p>
+            </div>
+          </div>
+          <p className="text-xs text-gray-400 mt-3">
+            Per-feed counts shown next to each feed below as <span className="font-mono">fetched / relevant</span>.
+          </p>
+        </div>
+      )}
+
       {/* Feeds grouped by category */}
       {grouped.map(({ category, feeds }) => (
         <div key={category} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
@@ -97,17 +149,45 @@ export default function SettingsPage() {
             {category === "general" && "General travel + AI news queries. Moderate filtering."}
           </p>
           <div className="space-y-2">
-            {feeds.map((feed) => (
-              <div key={feed.index} className="flex items-center gap-2">
-                <input type="checkbox" checked={feed.enabled} onChange={(e) => updateFeed(feed.index, "enabled", e.target.checked)} className="accent-amadeus-accent" />
-                <input type="text" value={feed.name} onChange={(e) => updateFeed(feed.index, "name", e.target.value)} placeholder="Name" className="w-40 px-2 py-1.5 border border-gray-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-amadeus-accent" />
-                <input type="text" value={feed.url} onChange={(e) => updateFeed(feed.index, "url", e.target.value)} placeholder="URL" className="flex-1 px-2 py-1.5 border border-gray-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-amadeus-accent font-mono text-xs" />
-                <select value={feed.category} onChange={(e) => updateFeed(feed.index, "category", e.target.value)} className="px-2 py-1.5 border border-gray-200 rounded text-xs">
-                  {feedCategories.map((c) => <option key={c} value={c}>{c}</option>)}
-                </select>
-                <button onClick={() => removeFeed(feed.index)} className="text-gray-400 hover:text-red-500"><X size={16} /></button>
-              </div>
-            ))}
+            {feeds.map((feed) => {
+              const stat = statsByName.get(feed.name);
+              return (
+                <div key={feed.index} className="flex items-center gap-2">
+                  <input type="checkbox" checked={feed.enabled} onChange={(e) => updateFeed(feed.index, "enabled", e.target.checked)} className="accent-amadeus-accent" />
+                  <input type="text" value={feed.name} onChange={(e) => updateFeed(feed.index, "name", e.target.value)} placeholder="Name" className="w-40 px-2 py-1.5 border border-gray-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-amadeus-accent" />
+                  <input type="text" value={feed.url} onChange={(e) => updateFeed(feed.index, "url", e.target.value)} placeholder="URL" className="flex-1 px-2 py-1.5 border border-gray-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-amadeus-accent font-mono text-xs" />
+                  {/* Per-feed stats badge */}
+                  {feedStats && (
+                    stat?.error ? (
+                      <span title={stat.error} className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-mono bg-red-50 text-red-600 whitespace-nowrap">
+                        <AlertCircle size={10} /> error
+                      </span>
+                    ) : stat ? (
+                      <span
+                        title={`Fetched ${stat.count} items; ${stat.relevant} passed travel/disruption filter`}
+                        className={`px-2 py-1 rounded text-[10px] font-mono whitespace-nowrap ${
+                          stat.relevant === 0
+                            ? "bg-gray-100 text-gray-400"
+                            : stat.relevant / Math.max(stat.count, 1) >= 0.3
+                              ? "bg-green-50 text-green-700"
+                              : "bg-amber-50 text-amber-700"
+                        }`}
+                      >
+                        {stat.count}/{stat.relevant}
+                      </span>
+                    ) : (
+                      <span title="Not fetched in last refresh (disabled or newly added)" className="px-2 py-1 rounded text-[10px] font-mono bg-gray-50 text-gray-300 whitespace-nowrap">
+                        —/—
+                      </span>
+                    )
+                  )}
+                  <select value={feed.category} onChange={(e) => updateFeed(feed.index, "category", e.target.value)} className="px-2 py-1.5 border border-gray-200 rounded text-xs">
+                    {feedCategories.map((c) => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                  <button onClick={() => removeFeed(feed.index)} className="text-gray-400 hover:text-red-500"><X size={16} /></button>
+                </div>
+              );
+            })}
           </div>
         </div>
       ))}

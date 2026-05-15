@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 import type { Signal } from "./signals";
 import { baselineSignals } from "./signals";
-import { getStoredSignals, storeSignals, mergeSignals, getLastRefresh, setLastRefresh } from "./store";
+import { getStoredSignals, storeSignals, mergeSignals, getLastRefresh, setLastRefresh, storeFeedStats } from "./store";
 import { fetchAllFeeds, type FetchResult } from "./fetchFeeds";
 
 interface DashboardState {
@@ -57,6 +57,12 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       setLastRefresh();
       setLastRefreshState(new Date().toISOString());
       setRefreshResult(result);
+      storeFeedStats({
+        refreshedAt: new Date().toISOString(),
+        totalFetched: result.totalFetched,
+        totalRelevant: result.totalRelevant,
+        perFeed: result.feedResults,
+      });
     } catch (err) {
       console.error("Refresh failed:", err);
     } finally {
