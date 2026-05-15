@@ -3,8 +3,13 @@ import { baselineSignals } from "./signals";
 
 // Cache version tracking — no longer wipes signals (additive-only).
 // Classification is applied dynamically so old signals get reclassified at render time.
-const CACHE_VERSION = "v8-additive-only";
+const CACHE_VERSION = "v9-disable-dead-feeds";
 const CACHE_VERSION_KEY = "amadeus_cache_version";
+
+// Feeds we've confirmed have permanently removed their RSS endpoints.
+// Disabled on migration; user can manually re-enable from Settings if any
+// of them resurrect their feed.
+const DEAD_FEED_NAMES = new Set(["PhocusWire", "Travel Weekly", "TTG Media"]);
 
 const STORAGE_KEYS = {
   signals: "amadeus_signals",
@@ -27,6 +32,30 @@ function checkCacheVersion(): void {
   if (typeof window === "undefined") return;
   const stored = localStorage.getItem(CACHE_VERSION_KEY);
   if (stored !== CACHE_VERSION) {
+    // Migration on version bump: disable feeds whose upstream RSS we've
+    // confirmed is permanently dead. Idempotent — safe to run multiple times.
+    try {
+      const rawSettings = localStorage.getItem(STORAGE_KEYS.settings);
+      if (rawSettings) {
+        const saved = JSON.parse(rawSettings) as DashboardSettings;
+        if (Array.isArray(saved.feeds)) {
+          let mutated = false;
+          saved.feeds = saved.feeds.map((f) => {
+            if (DEAD_FEED_NAMES.has(f.name) && f.enabled) {
+              mutated = true;
+              return { ...f, enabled: false };
+            }
+            return f;
+          });
+          if (mutated) {
+            localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(saved));
+            console.log("[Amadeus] Disabled dead feeds:", Array.from(DEAD_FEED_NAMES).join(", "));
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("[Amadeus] Migration failed:", e);
+    }
     // Just update the version — do NOT wipe signals
     // Startup names and classification are computed dynamically from signal data,
     // so old signals get reclassified automatically without deletion.
@@ -57,14 +86,19 @@ export interface DashboardSettings {
 const defaultFeeds: FeedConfig[] = [
   // TRAVEL-SPECIFIC (inherently relevant)
   { name: "Skift", url: "https://skift.com/feed/", enabled: true, category: "travel" },
-  { name: "PhocusWire", url: "https://www.phocuswire.com/feed", enabled: true, category: "travel" },
-  { name: "Travel Weekly", url: "https://www.travelweekly.com/rss/news", enabled: true, category: "travel" },
-  { name: "TTG Media", url: "https://www.ttgmedia.com/rss", enabled: true, category: "travel" },
+  // Confirmed dead at the upstream — kept for visibility but disabled.
+  { name: "PhocusWire", url: "https://www.phocuswire.com/feed", enabled: false, category: "travel" },
+  { name: "Travel Weekly", url: "https://www.travelweekly.com/rss/news", enabled: false, category: "travel" },
+  { name: "TTG Media", url: "https://www.ttgmedia.com/rss", enabled: false, category: "travel" },
   { name: "Hospitality Net", url: "https://www.hospitalitynet.org/rss/news.xml", enabled: true, category: "travel" },
   { name: "WebInTravel", url: "https://www.webintravel.com/feed/", enabled: true, category: "travel" },
   { name: "Travel Daily Media", url: "https://www.traveldailymedia.com/feed/", enabled: true, category: "travel" },
   { name: "Future Travel Experience", url: "https://www.futuretravelexperience.com/feed/", enabled: true, category: "travel" },
   { name: "Hospitality Tech Magazine", url: "https://www.hospitalitytech.com/rss.xml", enabled: true, category: "travel" },
+  // Replacements added to compensate for the three dead founding feeds.
+  { name: "The Company Dime", url: "https://thecompanydime.com/feed/", enabled: true, category: "travel" },
+  { name: "Aviation Today", url: "https://www.aviationtoday.com/feed/", enabled: true, category: "travel" },
+  { name: "Hotel Management", url: "https://www.hotelmanagement.net/rss.xml", enabled: true, category: "travel" },
 
   // TECH (needs strong travel filter)
   { name: "TechCrunch AI", url: "https://techcrunch.com/category/artificial-intelligence/feed/", enabled: true, category: "tech" },
@@ -76,6 +110,7 @@ const defaultFeeds: FeedConfig[] = [
   { name: "EU-Startups", url: "https://www.eu-startups.com/feed/", enabled: true, category: "startup" },
   { name: "Sifted", url: "https://sifted.eu/feed", enabled: true, category: "startup" },
   { name: "Tech.eu", url: "https://tech.eu/feed/", enabled: true, category: "startup" },
+  { name: "Tech in Asia", url: "https://www.techinasia.com/feed", enabled: true, category: "startup" },
 
   // STARTUP DISCOVERY — Google News RSS (broad coverage)
   { name: "GNews: Travel Tech Startup", url: "https://news.google.com/rss/search?q=travel+tech+startup+funding&hl=en&gl=US&ceid=US:en", enabled: true, category: "startup" },
