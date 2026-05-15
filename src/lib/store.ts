@@ -50,10 +50,22 @@ const defaultFeeds: FeedConfig[] = [
   { name: "PhocusWire", url: "https://www.phocuswire.com/feed", enabled: true, category: "travel" },
   { name: "Travel Weekly", url: "https://www.travelweekly.com/rss/news", enabled: true, category: "travel" },
   { name: "TTG Media", url: "https://www.ttgmedia.com/rss", enabled: true, category: "travel" },
+  { name: "Hospitality Net", url: "https://www.hospitalitynet.org/rss/news.xml", enabled: true, category: "travel" },
+  { name: "WebInTravel", url: "https://www.webintravel.com/feed/", enabled: true, category: "travel" },
+  { name: "Travel Daily Media", url: "https://www.traveldailymedia.com/feed/", enabled: true, category: "travel" },
+  { name: "Future Travel Experience", url: "https://www.futuretravelexperience.com/feed/", enabled: true, category: "travel" },
+  { name: "Hospitality Tech Magazine", url: "https://www.hospitalitytech.com/rss.xml", enabled: true, category: "travel" },
 
   // TECH (needs strong travel filter)
   { name: "TechCrunch AI", url: "https://techcrunch.com/category/artificial-intelligence/feed/", enabled: true, category: "tech" },
   { name: "The Verge", url: "https://www.theverge.com/rss/index.xml", enabled: true, category: "tech" },
+
+  // STARTUP DISCOVERY — direct feeds from startup/funding outlets
+  { name: "TechCrunch Startups", url: "https://techcrunch.com/category/startups/feed/", enabled: true, category: "startup" },
+  { name: "Crunchbase News", url: "https://news.crunchbase.com/feed/", enabled: true, category: "startup" },
+  { name: "EU-Startups", url: "https://www.eu-startups.com/feed/", enabled: true, category: "startup" },
+  { name: "Sifted", url: "https://sifted.eu/feed", enabled: true, category: "startup" },
+  { name: "Tech.eu", url: "https://tech.eu/feed/", enabled: true, category: "startup" },
 
   // STARTUP DISCOVERY — Google News RSS (broad coverage)
   { name: "GNews: Travel Tech Startup", url: "https://news.google.com/rss/search?q=travel+tech+startup+funding&hl=en&gl=US&ceid=US:en", enabled: true, category: "startup" },
@@ -137,7 +149,20 @@ export function getSettings(): DashboardSettings {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.settings);
     if (!raw) return defaultSettings;
-    return { ...defaultSettings, ...JSON.parse(raw) };
+    const saved = JSON.parse(raw) as Partial<DashboardSettings>;
+    const savedFeeds = saved.feeds ?? [];
+    // Merge new default feeds (by name) into saved feeds so existing users
+    // automatically pick up newly added sources without losing customizations.
+    if (savedFeeds.length === 0) {
+      return { ...defaultSettings, ...saved, feeds: defaultFeeds };
+    }
+    const savedFeedNames = new Set(savedFeeds.map((f) => f.name));
+    const newDefaults = defaultFeeds.filter((f) => !savedFeedNames.has(f.name));
+    return {
+      ...defaultSettings,
+      ...saved,
+      feeds: [...savedFeeds, ...newDefaults],
+    };
   } catch {
     return defaultSettings;
   }
