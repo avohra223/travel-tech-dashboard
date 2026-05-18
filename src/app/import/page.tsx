@@ -9,7 +9,7 @@ import {
   type SeedStartup,
   type SeedFile,
 } from "@/lib/seedImport";
-import { Database, Upload, CheckCircle2, AlertCircle, Download } from "lucide-react";
+import { Database, Upload, CheckCircle2, AlertCircle, Download, Cloud } from "lucide-react";
 import seedData from "../../../data/seed-startups.json";
 
 type ImportResult = {
@@ -51,6 +51,38 @@ export default function ImportPage() {
       setResult(res);
       // Force a soft reload so the DashboardContext re-reads localStorage
       setTimeout(() => window.location.reload(), 1500);
+    } finally {
+      setRunning(false);
+    }
+  };
+
+  const handleYCImport = async () => {
+    setRunning(true);
+    try {
+      const res = await fetch("/api/import/yc");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+        setResult({
+          source: "Y Combinator",
+          attempted: 0,
+          added: 0,
+          alreadyPresent: 0,
+          errors: [err.error || `Fetch failed (${res.status})`],
+        });
+        return;
+      }
+      const data = (await res.json()) as { entries: SeedStartup[]; totalAvailable: number };
+      const importResult = importEntries(data.entries, "Y Combinator");
+      setResult(importResult);
+      setTimeout(() => window.location.reload(), 2000);
+    } catch (err) {
+      setResult({
+        source: "Y Combinator",
+        attempted: 0,
+        added: 0,
+        alreadyPresent: 0,
+        errors: [err instanceof Error ? err.message : String(err)],
+      });
     } finally {
       setRunning(false);
     }
@@ -107,7 +139,7 @@ export default function ImportPage() {
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Seed import */}
         <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center gap-2 mb-2">
@@ -115,10 +147,8 @@ export default function ImportPage() {
             <h2 className="font-semibold text-amadeus-deep">Curated Seed Database</h2>
           </div>
           <p className="text-sm text-gray-500 mb-4">
-            {seedCount} hand-curated travel-tech startups across every sub-category (Corporate
-            Travel, Airline Tech, Hotel Tech, AI Assistants, Booking & Marketplace, Travel Fintech,
-            Vacation Rental, Search & Discovery, Distribution & APIs, Tour Operator Tech, Airport &
-            Ground, Data & Analytics). One click imports everything not already in your repository.
+            {seedCount} hand-curated travel-tech startups across every sub-category. One click
+            imports everything not already in your repository.
           </p>
           <button
             onClick={handleSeedImport}
@@ -127,6 +157,27 @@ export default function ImportPage() {
           >
             <Database size={14} />
             {running ? "Importing…" : `Import seed (${seedCount} startups)`}
+          </button>
+        </div>
+
+        {/* YC import */}
+        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+          <div className="flex items-center gap-2 mb-2">
+            <Cloud size={18} className="text-amadeus-accent" />
+            <h2 className="font-semibold text-amadeus-deep">Y Combinator</h2>
+          </div>
+          <p className="text-sm text-gray-500 mb-4">
+            Live fetch of all YC companies officially tagged <code className="text-xs bg-gray-100 px-1 rounded">Travel</code>{" "}
+            (~48 active). Pulls fresh data directly from YC's public Algolia index — includes batch,
+            location, and one-liner. Runs in under a second.
+          </p>
+          <button
+            onClick={handleYCImport}
+            disabled={running}
+            className="flex items-center gap-2 px-4 py-2 bg-amadeus-accent text-white rounded-lg text-sm font-medium hover:bg-amadeus-deep transition-colors disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed"
+          >
+            <Cloud size={14} />
+            {running ? "Fetching…" : "Import from YC"}
           </button>
         </div>
 
