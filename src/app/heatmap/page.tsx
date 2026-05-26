@@ -128,9 +128,48 @@ function normaliseCountry(s: string): string {
 // -- Page --------------------------------------------------------------------
 
 const TABS = [
-  { key: "vc", label: "Value Chain", icon: Layers, sub: "Where in the journey each archetype attacks" },
-  { key: "bu", label: "Amadeus Products", icon: Building2, sub: "Which Amadeus business each archetype threatens" },
-  { key: "geo", label: "Geography", icon: Globe2, sub: "Where in the world each threat originates" },
+  {
+    key: "vc",
+    label: "Booking Journey",
+    icon: Layers,
+    sub: "Where in the trip-booking journey each type of competitor attacks",
+    rowAxis: "Competitor archetype",
+    colAxis: "Stage of the booking journey",
+    explanation:
+      "Travel happens in stages — from researching a trip ('Discovery'), through aggregating options, booking, post-trip servicing, taking payment, and finally settling money between airlines and agents. Each cell shows how many companies in a given competitor archetype are active at that stage.",
+    exampleTemplate: (sample: { row: string; col: string; n: number }) =>
+      `Example: "${sample.row} × ${sample.col} = ${sample.n}" means ${sample.n} compan${
+        sample.n === 1 ? "y" : "ies"
+      } in the ${sample.row} archetype operate at the ${sample.col} stage.`,
+  },
+  {
+    key: "bu",
+    label: "Amadeus Businesses",
+    icon: Building2,
+    sub: "Which of Amadeus's product lines each competitor archetype puts at risk",
+    rowAxis: "Competitor archetype",
+    colAxis: "Amadeus business unit",
+    explanation:
+      "Amadeus runs several distinct businesses (Airline IT, Distribution / GDS, Corporate Travel, Hospitality, Payments, Airport Operations, Data & Identity). Each cell shows how many competitors in that archetype directly threaten that Amadeus business.",
+    exampleTemplate: (sample: { row: string; col: string; n: number }) =>
+      `Example: "${sample.row} × ${sample.col} = ${sample.n}" means ${sample.n} compan${
+        sample.n === 1 ? "y" : "ies"
+      } in the ${sample.row} archetype directly threaten Amadeus's ${sample.col} business.`,
+  },
+  {
+    key: "geo",
+    label: "Geography",
+    icon: Globe2,
+    sub: "Which countries each kind of threat is coming out of",
+    rowAxis: "Competitor archetype",
+    colAxis: "Headquarters country",
+    explanation:
+      "Each cell shows how many companies of a given archetype are headquartered in a given country. Useful for spotting regional clusters (e.g. Israeli airline-tech, Indian distribution platforms) and for partnership / acquisition planning.",
+    exampleTemplate: (sample: { row: string; col: string; n: number }) =>
+      `Example: "${sample.row} × ${sample.col} = ${sample.n}" means ${sample.n} compan${
+        sample.n === 1 ? "y" : "ies"
+      } in the ${sample.row} archetype are headquartered in ${sample.col}.`,
+  },
 ] as const;
 
 type TabKey = (typeof TABS)[number]["key"];
@@ -256,10 +295,10 @@ export default function HeatmapPage() {
         <h1 className="text-2xl md:text-3xl font-bold tracking-wide">
           Competitive Heatmap
         </h1>
-        <p className="text-sm text-white/60 mt-1">
-          {ALL_COMPANIES.length} companies across {ARCHETYPES.length} archetypes —
-          concentration of competitive pressure across {TABS.length} dimensions.
-          Click any cell to see the companies inside it.
+        <p className="text-sm text-white/70 mt-1 max-w-3xl">
+          A bird&apos;s-eye view of the {ALL_COMPANIES.length} companies competing
+          with Amadeus. Pick a lens below — each one slices the same companies a
+          different way. Brighter cells mean more competitors clustered there.
         </p>
 
         {/* Tabs */}
@@ -271,31 +310,43 @@ export default function HeatmapPage() {
               <button
                 key={t.key}
                 onClick={() => setTab(t.key)}
-                className={`group flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
+                className={`group flex flex-col items-start gap-0.5 px-4 py-2.5 rounded-lg border transition-all ${
                   isActive
                     ? "bg-white text-black border-white shadow-lg"
                     : "bg-white/5 text-white/80 border-white/10 hover:bg-white/10 hover:border-white/20"
                 }`}
               >
-                <Icon size={16} />
-                <span className="text-sm font-semibold">{t.label}</span>
+                <div className="flex items-center gap-2">
+                  <Icon size={16} />
+                  <span className="text-sm font-semibold">{t.label}</span>
+                </div>
+                <span
+                  className={`text-[10px] leading-tight ${
+                    isActive ? "text-black/60" : "text-white/45"
+                  }`}
+                >
+                  {t.sub}
+                </span>
               </button>
             );
           })}
         </div>
-        <p className="text-xs text-white/50 mt-2">
-          {TABS.find((t) => t.key === tab)?.sub}
-        </p>
       </div>
 
-      {/* Heatmap grid */}
+      {/* Body */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 pb-12">
+        {/* Explainer card — adapts per tab */}
+        <Explainer matrix={active} tabKey={tab} />
+
+        {/* Heatmap grid */}
         <div className="rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm p-4 md:p-6 overflow-x-auto">
           <HeatmapGrid
             rows={active.rows}
             cols={active.cols}
             cells={active.cells}
             maxCount={maxCount}
+            rowAxis={TABS.find((t) => t.key === tab)!.rowAxis}
+            colAxis={TABS.find((t) => t.key === tab)!.colAxis}
             onCellClick={(row, col, companies) =>
               companies.length > 0 && setSelectedCell({ row, col, companies })
             }
@@ -303,8 +354,8 @@ export default function HeatmapPage() {
         </div>
 
         {/* Legend */}
-        <div className="mt-4 flex items-center gap-3 text-xs text-white/60">
-          <span>Less</span>
+        <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-white/60">
+          <span>Fewer companies</span>
           <div className="flex h-3 rounded overflow-hidden border border-white/10">
             {Array.from({ length: 10 }, (_, i) => (
               <div
@@ -314,15 +365,15 @@ export default function HeatmapPage() {
               />
             ))}
           </div>
-          <span>More</span>
-          <span className="ml-auto">
-            Scale: 0–{maxCount} companies per cell
+          <span>More companies</span>
+          <span className="ml-auto text-white/50">
+            Scale runs from 0 to {maxCount} companies per cell
           </span>
         </div>
 
         {/* Summary stats */}
         <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-          {topInsights(active).map((insight) => (
+          {topInsights(active, tab).map((insight) => (
             <div
               key={insight.label}
               className="rounded-xl bg-white/5 border border-white/10 p-3"
@@ -355,6 +406,81 @@ export default function HeatmapPage() {
   );
 }
 
+// -- Explainer card ----------------------------------------------------------
+
+function Explainer({
+  matrix,
+  tabKey,
+}: {
+  matrix: {
+    rows: string[];
+    cols: string[];
+    cells: Record<string, Record<string, Company[]>>;
+  };
+  tabKey: TabKey;
+}) {
+  const tab = TABS.find((t) => t.key === tabKey)!;
+
+  // Pick a real, non-zero cell to anchor the example — prefer the hottest one
+  // so the example feels meaningful, not arbitrary.
+  const example = useMemo(() => {
+    let best: { row: string; col: string; n: number } = {
+      row: matrix.rows[0],
+      col: matrix.cols[0],
+      n: 0,
+    };
+    matrix.rows.forEach((r) =>
+      matrix.cols.forEach((c) => {
+        const n = matrix.cells[r][c].length;
+        if (n > best.n) best = { row: r, col: c, n };
+      })
+    );
+    return best;
+  }, [matrix]);
+
+  return (
+    <div className="mb-5 rounded-2xl bg-gradient-to-br from-white/[0.07] to-white/[0.03] border border-white/10 p-5 md:p-6">
+      <div className="grid md:grid-cols-3 gap-5 md:gap-6">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-white/40 mb-1.5">
+            What this shows
+          </p>
+          <p className="text-sm text-white/85 leading-relaxed">
+            {tab.explanation}
+          </p>
+        </div>
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-white/40 mb-1.5">
+            How to read a cell
+          </p>
+          <ul className="text-sm text-white/85 leading-relaxed space-y-1">
+            <li>
+              <span className="text-white/50">↓ Rows:</span>{" "}
+              <span className="font-medium">{tab.rowAxis}</span>
+            </li>
+            <li>
+              <span className="text-white/50">→ Columns:</span>{" "}
+              <span className="font-medium">{tab.colAxis}</span>
+            </li>
+            <li>
+              <span className="text-white/50">Number in cell:</span> count of
+              companies at that intersection
+            </li>
+          </ul>
+        </div>
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-white/40 mb-1.5">
+            Worked example
+          </p>
+          <p className="text-sm text-white/85 leading-relaxed">
+            {tab.exampleTemplate(example)}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // -- Heatmap grid ------------------------------------------------------------
 
 function HeatmapGrid({
@@ -362,28 +488,63 @@ function HeatmapGrid({
   cols,
   cells,
   maxCount,
+  rowAxis,
+  colAxis,
   onCellClick,
 }: {
   rows: string[];
   cols: string[];
   cells: Record<string, Record<string, Company[]>>;
   maxCount: number;
+  rowAxis: string;
+  colAxis: string;
   onCellClick: (row: string, col: string, companies: Company[]) => void;
 }) {
+  // Pre-compute totals so the user sees the "shape" of each axis at a glance.
+  const rowTotals: Record<string, number> = {};
+  rows.forEach((r) => {
+    rowTotals[r] = cols.reduce((acc, c) => acc + cells[r][c].length, 0);
+  });
+  const colTotals: Record<string, number> = {};
+  cols.forEach((c) => {
+    colTotals[c] = rows.reduce((acc, r) => acc + cells[r][c].length, 0);
+  });
+
+  const gridCols = `220px repeat(${cols.length}, minmax(80px, 1fr))`;
+
   return (
     <div className="min-w-[640px]">
-      {/* Column headers */}
+      {/* Axis label row */}
+      <div
+        className="grid items-end gap-1.5 mb-1"
+        style={{ gridTemplateColumns: gridCols }}
+      >
+        <div className="text-[10px] font-bold uppercase tracking-wider text-white/40 pr-3">
+          ↓ {rowAxis}
+        </div>
+        <div
+          className="text-[10px] font-bold uppercase tracking-wider text-white/40 text-center"
+          style={{ gridColumn: `span ${cols.length}` }}
+        >
+          → {colAxis}
+        </div>
+      </div>
+
+      {/* Column headers with totals */}
       <div
         className="grid items-end gap-1.5 mb-1.5"
-        style={{ gridTemplateColumns: `220px repeat(${cols.length}, minmax(80px, 1fr))` }}
+        style={{ gridTemplateColumns: gridCols }}
       >
         <div />
         {cols.map((c) => (
           <div
             key={c}
-            className="text-[11px] md:text-xs font-semibold text-white/70 text-center px-1 leading-tight"
+            className="text-[11px] md:text-xs font-semibold text-white/80 text-center px-1 leading-tight"
           >
             {c}
+            <div className="text-[9px] text-white/40 font-normal mt-0.5">
+              {colTotals[c]} total
+            </div>
           </div>
         ))}
       </div>
@@ -393,10 +554,13 @@ function HeatmapGrid({
         <div
           key={row}
           className="grid items-stretch gap-1.5 mb-1.5"
-          style={{ gridTemplateColumns: `220px repeat(${cols.length}, minmax(80px, 1fr))` }}
+          style={{ gridTemplateColumns: gridCols }}
         >
           <div className="flex items-center pr-3 text-xs md:text-sm font-semibold text-white/85 leading-tight">
-            {row}
+            <span className="truncate">{row}</span>
+            <span className="ml-2 shrink-0 text-[10px] text-white/45 font-normal">
+              {rowTotals[row]} total
+            </span>
           </div>
           {cols.map((col) => {
             const companies = cells[row][col];
@@ -412,7 +576,13 @@ function HeatmapGrid({
                   backgroundColor: heatColor(intensity, n === 0 ? 0 : 1),
                   animationDelay: `${rIdx * 40}ms`,
                 }}
-                title={`${row} × ${col} — ${n} compan${n === 1 ? "y" : "ies"}`}
+                title={
+                  n === 0
+                    ? `${row} × ${col} — no companies`
+                    : `${row} × ${col} — ${n} compan${
+                        n === 1 ? "y" : "ies"
+                      } (click for details)`
+                }
               >
                 <div className="absolute inset-0 flex flex-col items-center justify-center px-2 py-1">
                   <span
@@ -425,9 +595,9 @@ function HeatmapGrid({
                 </div>
                 {/* Hover preview of company names */}
                 {n > 0 && (
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-black/75 backdrop-blur-sm flex flex-col items-start justify-start p-2 overflow-hidden">
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 backdrop-blur-sm flex flex-col items-start justify-start p-2 overflow-hidden">
                     <p className="text-[9px] font-bold uppercase tracking-wider text-white/60 mb-0.5">
-                      {n} compan{n === 1 ? "y" : "ies"}
+                      {n} compan{n === 1 ? "y" : "ies"} — click for details
                     </p>
                     <div className="text-[10px] text-white/90 leading-tight space-y-0.5 overflow-hidden">
                       {companies.slice(0, 6).map((c) => (
@@ -483,11 +653,14 @@ function heatColor(t: number, alpha: number): string {
 
 // -- Summary stats -----------------------------------------------------------
 
-function topInsights(matrix: {
-  rows: string[];
-  cols: string[];
-  cells: Record<string, Record<string, Company[]>>;
-}) {
+function topInsights(
+  matrix: {
+    rows: string[];
+    cols: string[];
+    cells: Record<string, Record<string, Company[]>>;
+  },
+  tabKey: TabKey
+) {
   // Hottest cell
   let hot = { row: "", col: "", count: 0 };
   matrix.rows.forEach((r) =>
@@ -497,7 +670,6 @@ function topInsights(matrix: {
     })
   );
 
-  // Row totals
   const rowTotals = matrix.rows.map((r) => ({
     row: r,
     total: matrix.cols.reduce(
@@ -507,7 +679,6 @@ function topInsights(matrix: {
   }));
   const topRow = [...rowTotals].sort((a, b) => b.total - a.total)[0];
 
-  // Col totals
   const colTotals = matrix.cols.map((c) => ({
     col: c,
     total: matrix.rows.reduce(
@@ -517,7 +688,6 @@ function topInsights(matrix: {
   }));
   const topCol = [...colTotals].sort((a, b) => b.total - a.total)[0];
 
-  // Empty cells
   const total = matrix.rows.length * matrix.cols.length;
   const empty = matrix.rows.reduce(
     (acc, r) =>
@@ -526,26 +696,50 @@ function topInsights(matrix: {
     0
   );
 
+  // Tab-specific labels — plain English, no jargon
+  const labels: Record<
+    TabKey,
+    { biggestCluster: string; topRow: string; topCol: string }
+  > = {
+    vc: {
+      biggestCluster: "Biggest cluster",
+      topRow: "Most active archetype",
+      topCol: "Busiest booking stage",
+    },
+    bu: {
+      biggestCluster: "Biggest threat cluster",
+      topRow: "Most active archetype",
+      topCol: "Amadeus business under most pressure",
+    },
+    geo: {
+      biggestCluster: "Densest country–archetype",
+      topRow: "Most active archetype",
+      topCol: "Country with most competitors",
+    },
+  };
+
+  const l = labels[tabKey];
+
   return [
     {
-      label: "Hottest cell",
+      label: l.biggestCluster,
       value: `${hot.row} × ${hot.col}`,
-      detail: `${hot.count} companies`,
+      detail: `${hot.count} compan${hot.count === 1 ? "y" : "ies"} packed in one cell`,
     },
     {
-      label: "Most active row",
+      label: l.topRow,
       value: topRow?.row || "—",
-      detail: `${topRow?.total || 0} companies (incl. multi-hits)`,
+      detail: `${topRow?.total || 0} companies across all columns`,
     },
     {
-      label: "Most contested column",
+      label: l.topCol,
       value: topCol?.col || "—",
-      detail: `${topCol?.total || 0} companies`,
+      detail: `${topCol?.total || 0} companies across all archetypes`,
     },
     {
-      label: "Coverage",
-      value: `${total - empty}/${total} cells`,
-      detail: `${Math.round(((total - empty) / total) * 100)}% non-empty`,
+      label: "Cells with activity",
+      value: `${total - empty} of ${total}`,
+      detail: `${Math.round(((total - empty) / total) * 100)}% of intersections have at least one competitor`,
     },
   ];
 }
