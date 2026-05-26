@@ -12,12 +12,14 @@ import {
   Newspaper,
   Settings,
   Orbit,
+  Grid3x3,
   X,
 } from "lucide-react";
 
 const navItems = [
   { href: "/", label: "Overview", icon: LayoutDashboard },
   { href: "/landscape-universe", label: "Landscape Universe", icon: Orbit },
+  { href: "/heatmap", label: "Competitive Heatmap", icon: Grid3x3 },
   { href: "/competitors", label: "Major Competitors", icon: Swords },
   { href: "/value-chain", label: "Value Chain", icon: Workflow },
   { href: "/ai-tools", label: "Startups & New Entrants", icon: Rocket },
