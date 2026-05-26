@@ -11,11 +11,13 @@ import {
   TrendingUp,
   Newspaper,
   Settings,
+  Orbit,
   X,
 } from "lucide-react";
 
 const navItems = [
   { href: "/", label: "Overview", icon: LayoutDashboard },
+  { href: "/landscape-universe", label: "Landscape Universe", icon: Orbit },
   { href: "/competitors", label: "Major Competitors", icon: Swords },
   { href: "/value-chain", label: "Value Chain", icon: Workflow },
   { href: "/ai-tools", label: "Startups & New Entrants", icon: Rocket },
