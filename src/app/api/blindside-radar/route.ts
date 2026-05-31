@@ -11,40 +11,238 @@ import { NextRequest, NextResponse } from "next/server";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const TRAVEL_KEYWORDS = [
+// ----------------------------------------------------------------------------
+// RELEVANCE ENGINE
+//
+// The bar is NOT "the headline contains a travel word" — that matches Netflix
+// show titles like "Long Vacation" or "College Road Trip". The bar is "this
+// company is making a STRATEGIC MOVE in the travel INDUSTRY": a partnership,
+// launch, market entry, investment, or an AI-for-travel play.
+//
+// A headline qualifies only if it has EITHER:
+//   (a) a TIER-1 industry signal — a named travel player (Booking.com, Hilton,
+//       an airline…) or unambiguous industry infrastructure (NDC, OTA, "travel
+//       platform") — these are specific enough to count on their own; OR
+//   (b) a TIER-2 travel word (travel/airline/hotel/aviation…) PLUS a strategic
+//       ACTION word (partners/launches/enters/invests/AI…) in the same headline.
+// ----------------------------------------------------------------------------
+
+// Tier 1 — named travel-industry players & hard infrastructure. Co-mention with
+// the target company is itself the signal, so these qualify without an action.
+const TIER1_INDUSTRY = [
+  "booking.com",
+  "expedia",
+  "airbnb",
+  "tripadvisor",
+  "kayak",
+  "skyscanner",
+  "trip.com",
+  "marriott",
+  "hilton",
+  "hyatt",
+  "accor",
+  "intercontinental",
+  "wyndham",
+  "ryanair",
+  "easyjet",
+  "lufthansa",
+  "emirates",
+  "united airlines",
+  "american airlines",
+  "delta air",
+  "jetblue",
+  "sabre",
+  "travelport",
+  "online travel",
+  "travel booking",
+  "flight booking",
+  "hotel booking",
+  "travel agency",
+  "travel platform",
+  "travel industry",
+  "travel sector",
+  "travel space",
+  "travel startup",
+  "travel-tech",
+  "travel tech",
+  "in-flight",
+  "trip planning",
+  "ota", // boundary-matched below
+  "gds", // boundary-matched below
+  "ndc", // boundary-matched below
+];
+
+// Tier 2 — generic travel-domain words. Only count when paired with an action.
+const TIER2_TRAVEL = [
   "travel",
   "airline",
   "airlines",
+  "airfare",
   "flight",
   "flights",
-  "airfare",
   "hotel",
   "hotels",
-  "booking",
-  "bookings",
-  "trip",
-  "trips",
-  "tourism",
-  "tourist",
   "hospitality",
-  "vacation",
-  "holiday",
-  "airport",
   "aviation",
-  "itinerary",
+  "tourism",
   "lodging",
-  "ota", // online travel agency
-  "gds", // global distribution system
-  "ndc", // new distribution capability
-  "expedia",
-  "booking.com",
-  "tripadvisor",
-  "airbnb",
 ];
 
-// The travel keyword cluster used to constrain the Google News query.
+// Action groups — strategic-move signals. Order = display priority for the
+// signal-type tag shown on each result.
+const ACTION_GROUPS: { type: string; terms: string[] }[] = [
+  {
+    type: "Partnership",
+    terms: [
+      "partner",
+      "partners",
+      "partnership",
+      "teams up",
+      "tie-up",
+      "tie up",
+      "alliance",
+      "collaborat",
+      "joins forces",
+      "joint venture",
+      "signs deal",
+      "signs a deal",
+      "agreement",
+      "links up",
+      "working with",
+    ],
+  },
+  {
+    type: "Investment / M&A",
+    terms: [
+      "acquire",
+      "acquires",
+      "acquisition",
+      "buys",
+      "buyout",
+      "invest",
+      "invests",
+      "investment",
+      "takes a stake",
+      "stake in",
+      "backs",
+      "funding",
+    ],
+  },
+  {
+    type: "Expansion / Entry",
+    terms: [
+      "enter",
+      "enters",
+      "entering",
+      "expansion",
+      "expands",
+      "expanding",
+      "moves into",
+      "move into",
+      "pushes into",
+      "push into",
+      "steps into",
+      "branches into",
+      "eyes",
+      "to offer",
+    ],
+  },
+  {
+    type: "AI in Travel",
+    terms: [
+      "ai", // boundary-matched below
+      "a.i.",
+      "artificial intelligence",
+      "chatbot",
+      "copilot",
+      "agentic",
+      "ai agent",
+      "ai-powered",
+      "genai",
+      "generative ai",
+      "llm",
+    ],
+  },
+  {
+    type: "Launch / Product",
+    terms: [
+      "launch",
+      "launches",
+      "launching",
+      "unveil",
+      "unveils",
+      "introduces",
+      "debut",
+      "debuts",
+      "rolls out",
+      "roll out",
+      "new service",
+      "new feature",
+      "integrat",
+      "powers",
+    ],
+  },
+];
+
+// Terms that need a word boundary so they don't match inside other words
+// (e.g. "ai" inside "air", "ota" inside "Toyota", "ndc" inside "grandchild").
+const BOUNDARY: Record<string, RegExp> = {
+  ai: /\bai\b/i,
+  ota: /\bota\b/i,
+  gds: /\bgds\b/i,
+  ndc: /\bndc\b/i,
+};
+
+function hasTerm(hay: string, term: string): boolean {
+  const b = BOUNDARY[term];
+  return b ? b.test(hay) : hay.includes(term);
+}
+
+interface Classification {
+  qualifies: boolean;
+  signalType: string;
+  matched: string[];
+  relevance: number;
+}
+
+function classifyHeadline(hay: string): Classification {
+  const tier1 = TIER1_INDUSTRY.filter((t) => hasTerm(hay, t));
+  const tier2 = TIER2_TRAVEL.filter((t) => hasTerm(hay, t));
+
+  let actionType: string | null = null;
+  const actionMatched: string[] = [];
+  for (const g of ACTION_GROUPS) {
+    const m = g.terms.filter((t) => hasTerm(hay, t));
+    if (m.length) {
+      if (!actionType) actionType = g.type;
+      actionMatched.push(...m);
+    }
+  }
+  const hasAction = actionMatched.length > 0;
+
+  const qualifies = tier1.length > 0 || (tier2.length > 0 && hasAction);
+  if (!qualifies) {
+    return { qualifies: false, signalType: "", matched: [], relevance: 0 };
+  }
+
+  const signalType = actionType || "Industry mention";
+  const matched = Array.from(
+    new Set([
+      ...tier1,
+      ...(tier2.length && hasAction ? tier2 : []),
+      ...actionMatched,
+    ])
+  ).slice(0, 4);
+  const relevance =
+    tier1.length * 4 + (tier2.length && hasAction ? 3 : 0) + actionMatched.length;
+
+  return { qualifies: true, signalType, matched, relevance };
+}
+
+// Google News query cluster — broad on the fetch (recall), strict on the
+// server-side classify (precision).
 const QUERY_TRAVEL_CLAUSE =
-  "(travel OR airline OR flights OR hotel OR booking OR trip OR tourism OR hospitality OR vacation OR airport OR aviation)";
+  "(travel OR airline OR hotel OR booking OR tourism OR hospitality OR aviation OR flights)";
 
 interface NewsItem {
   title: string;
@@ -53,6 +251,7 @@ interface NewsItem {
   isoDate: string;
   ageDays: number;
   relevance: number;
+  signalType: string;
   matchedKeywords: string[];
 }
 
@@ -225,14 +424,11 @@ export async function GET(request: NextRequest) {
       const ageDays = Math.floor((now - t.getTime()) / 86400000);
       if (ageDays < 0 || ageDays > 366) continue;
 
-      const haystack = `${r.title} ${r.source}`.toLowerCase();
-
-      // Hard requirement: at least one travel keyword present.
-      const matched = TRAVEL_KEYWORDS.filter((k) => haystack.includes(k));
-      if (matched.length === 0) continue;
-
-      // Soft signal: does the company actually appear? Boosts relevance + sort.
-      const companyPresent = company.tokens.some((tok) => haystack.includes(tok));
+      // Classify on the title only — the source/publisher name shouldn't
+      // contribute travel/action signal (e.g. a "Travel Weekly" byline).
+      const haystack = r.title.toLowerCase();
+      const cls = classifyHeadline(haystack);
+      if (!cls.qualifies) continue;
 
       // Dedupe by normalized title.
       const key = r.title.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim().slice(0, 80);
@@ -245,8 +441,9 @@ export async function GET(request: NextRequest) {
         source: r.source || "Google News",
         isoDate: t.toISOString(),
         ageDays,
-        relevance: matched.length * 2 + (companyPresent ? 3 : 0),
-        matchedKeywords: matched.slice(0, 6),
+        relevance: cls.relevance,
+        signalType: cls.signalType,
+        matchedKeywords: cls.matched,
       });
     }
 

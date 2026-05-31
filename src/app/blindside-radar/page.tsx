@@ -19,7 +19,18 @@ type NewsItem = {
   isoDate: string;
   ageDays: number;
   relevance: number;
+  signalType: string;
   matchedKeywords: string[];
+};
+
+// Color per strategic signal type.
+const SIGNAL_STYLES: Record<string, string> = {
+  Partnership: "bg-emerald-400/15 text-emerald-300 border-emerald-400/30",
+  "Investment / M&A": "bg-amber-400/15 text-amber-300 border-amber-400/30",
+  "Expansion / Entry": "bg-fuchsia-400/15 text-fuchsia-300 border-fuchsia-400/30",
+  "AI in Travel": "bg-cyan-400/15 text-cyan-300 border-cyan-400/30",
+  "Launch / Product": "bg-blue-400/15 text-blue-300 border-blue-400/30",
+  "Industry mention": "bg-white/10 text-white/60 border-white/20",
 };
 
 type ScanResult = {
@@ -98,9 +109,11 @@ export default function BlindsideRadarPage() {
             </h1>
             <p className="text-sm text-white/70 mt-1 max-w-2xl">
               Paste any company&apos;s website. The radar scans the world&apos;s news
-              for what that company has been doing in <strong>travel</strong> over
-              the last year — built to catch non-travel giants quietly moving into
-              Amadeus&apos;s territory.
+              for <strong>strategic moves into travel</strong> — partnerships,
+              launches, market entry, investments, and AI-for-travel plays — over
+              the last year. Built to catch non-travel giants quietly moving into
+              Amadeus&apos;s territory, while ignoring incidental mentions of words
+              like &ldquo;trip&rdquo; or &ldquo;vacation.&rdquo;
             </p>
           </div>
         </div>
@@ -203,7 +216,7 @@ export default function BlindsideRadarPage() {
                 <div className="text-right">
                   <p className="text-3xl font-bold text-cyan-300">{result.total}</p>
                   <p className="text-xs text-white/50">
-                    travel-related news items in the last year
+                    strategic travel moves in the last year
                   </p>
                 </div>
               </div>
@@ -269,6 +282,16 @@ export default function BlindsideRadarPage() {
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span
+                            className={`text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full border ${
+                              SIGNAL_STYLES[item.signalType] ||
+                              SIGNAL_STYLES["Industry mention"]
+                            }`}
+                          >
+                            {item.signalType}
+                          </span>
+                        </div>
                         <p className="font-medium text-[15px] leading-snug group-hover:text-cyan-200 transition-colors">
                           {item.title}
                         </p>
@@ -281,11 +304,11 @@ export default function BlindsideRadarPage() {
                             {formatDate(item.isoDate)}
                           </span>
                           {item.matchedKeywords.length > 0 && (
-                            <span className="inline-flex gap-1">
+                            <span className="inline-flex gap-1 flex-wrap">
                               {item.matchedKeywords.slice(0, 3).map((k) => (
                                 <span
                                   key={k}
-                                  className="px-1.5 py-0.5 rounded bg-cyan-400/10 text-cyan-300/80 text-[10px]"
+                                  className="px-1.5 py-0.5 rounded bg-white/5 text-white/50 text-[10px]"
                                 >
                                   {k}
                                 </span>
@@ -306,11 +329,13 @@ export default function BlindsideRadarPage() {
 
             {/* Methodology footnote */}
             <p className="text-[11px] text-white/30 mt-6 leading-relaxed">
-              Source: Google News index, filtered to items mentioning travel,
-              airline, hotel, booking, flight, tourism, hospitality, aviation or
-              airport terms and scoped to the last 12 months. This aggregates
-              published news — it is a fast signal, not an exhaustive audit.
-              Query used:{" "}
+              Source: Google News index (last 12 months). A headline only counts
+              when it pairs a travel-industry context (a named travel player like
+              Booking.com or an airline, or terms like travel/hotel/aviation) with
+              a <strong>strategic move</strong> — partnership, launch, market
+              entry, investment, or an AI-for-travel play. Incidental mentions of
+              &ldquo;trip&rdquo; or &ldquo;vacation&rdquo; in unrelated content are
+              filtered out. This is a fast signal, not an exhaustive audit. Query:{" "}
               <code className="text-white/40">{result.query}</code>
             </p>
           </div>
@@ -341,14 +366,14 @@ function verdict(r: ScanResult): string {
     return `No visible travel-tech activity for ${r.company} in the last year. Not currently moving into travel — worth a periodic re-scan.`;
   const recent = d30;
   if (recent >= 5)
-    return `High recent activity: ${recent} travel-related items in just the last 30 days. ${r.company} appears to be actively moving in travel right now.`;
+    return `High recent activity: ${recent} strategic travel moves in just the last 30 days. ${r.company} appears to be actively pushing into travel right now.`;
   if (d120 >= 5)
-    return `Building momentum: ${d120} travel-related items in the last 120 days. Worth watching closely.`;
+    return `Building momentum: ${d120} strategic travel moves in the last 120 days. Worth watching closely.`;
   if (d365 >= 3)
-    return `Some travel-tech signals over the year (${d365} items), but no recent surge. Early or exploratory.`;
-  return `Light footprint: only ${d365} travel-related item${
+    return `Some strategic travel signals over the year (${d365} moves), but no recent surge. Early or exploratory.`;
+  return `Light footprint: only ${d365} strategic travel move${
     d365 === 1 ? "" : "s"
-  } in the past year. Minimal travel activity so far.`;
+  } in the past year. Minimal activity so far.`;
 }
 
 function relativeDate(ageDays: number): string {
